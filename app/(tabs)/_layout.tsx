@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import {StyleSheet} from "react-native"
+import ModalCompo from '@/components/ModalCompo';
 
 export default function TabLayout() {
 
@@ -10,23 +11,25 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle:{...styles.bottom},
+        tabBarShowLabel: false,
       }}
       >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
-          ),
-        }}
-      />
+      name="index"
+      options={{
+        title: 'home',
+        tabBarIcon: ({ focused, color, size }) => (
+          <TabBarIcon name={focused ? 'home' : 'home-outline'} color={"black"} />
+
+        )
+      }}
+    />
       <Tabs.Screen
         name="notification"
         options={{
           title: 'Notification',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'notifications' : 'notifications-outline'} color={color} />
+            <TabBarIcon name={focused ? 'notifications' : 'notifications-outline'} color={"black"} />
           ),
         }}
     
@@ -36,7 +39,7 @@ export default function TabLayout() {
         options={{
           title: 'Setting',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'cog' : 'cog-outline'} color={color} />
+            <TabBarIcon name={focused ? 'cog' : 'cog-outline'} color={"black"} />
           ),
         }}
       />
@@ -45,10 +48,11 @@ export default function TabLayout() {
 }
 const styles=StyleSheet.create({
   bottom:{
-    backgroundColor:"red",
+    backgroundColor:"#BB86FC",
     margin:5,
-    height:60,
+    height:70,
     borderRadius:16,
+    paddingBottom:5
   },
 
 })

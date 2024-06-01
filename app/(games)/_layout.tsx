@@ -19,6 +19,24 @@ export default function TabLayout() {
           ),
         }}
       />
+       <Tabs.Screen
+        name="recycling"
+        options={{
+          title: 'Game game',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
+       <Tabs.Screen
+        name="calculeFacture"
+        options={{
+          title: 'calculeFacture',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

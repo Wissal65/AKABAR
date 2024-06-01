@@ -1,20 +1,45 @@
-import {View,Text, Image, StyleSheet, Platform,TouchableOpacity } from 'react-native';
-import { useFonts } from 'expo-font';
-import { useEffect } from 'react';
+import {View,Text, Image, StyleSheet, Platform,TouchableOpacity,Button } from 'react-native';
+import { useEffect ,useState} from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ScrollView } from 'react-native-reanimated/lib/typescript/Animated';
 import { useNavigation } from '@react-navigation/native';
+import { getScore} from '../../hooks/scoreManager'
+import { Link } from 'expo-router';
+import ModalComponent from '@/components/ModalComponent';
+import { openModal } from '@/store/reducer/ui/ModalSlice';
+import { openAssisModal } from '@/store/reducer/ui/MdalAssistantSlice';
+import { useDispatch } from 'react-redux';
+import diamond from "@/assets/images/icons/diamond.png";
 SplashScreen.preventAutoHideAsync();
 
  const HomeScreen=()=> {
+  const dispatch = useDispatch();
+
+  const handleOpenModal = () => {
+    dispatch(openModal({ componentName: 'YourComponentName' }));
+  };
   const navigation = useNavigation();
 
   const navigateToGames = () => {
     navigation.navigate('(games)');
   };
+  const [score, setScore] = useState(0);
+
+  useEffect(() => {
+    const loadScore = async () => {
+      const savedScore = await getScore();
+      setScore(savedScore);
+    };
+
+    loadScore();
+  }, []);
   return (
-    <View style={styles.container}>
+  
+  <View style={styles.container}>
+    <View style={styles.scoreContainer}>
+      <Text style={styles.score}>{score}</Text>
+      <Image source={diamond} style={styles.diamond}/>
+    </View>
      <TouchableOpacity onPress={navigateToGames}>
        <LinearGradient
         // Button Linear Gradient
@@ -34,7 +59,6 @@ SplashScreen.preventAutoHideAsync();
         </View>
       </LinearGradient>
       </TouchableOpacity>
-
       <TouchableOpacity >
        <LinearGradient
         // Button Linear Gradient
@@ -73,6 +97,8 @@ SplashScreen.preventAutoHideAsync();
         </View>
       </LinearGradient>
       </TouchableOpacity>
+      <Button title="Open Modal" onPress={handleOpenModal} />
+      <ModalComponent />
     </View>
   );
 }
@@ -82,7 +108,23 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
-    paddingTop:100
+    paddingTop:50
+  },
+  scoreContainer:{
+    flexDirection:"row",
+    justifyContent:"flex-end",
+    alignItems:"center",
+    width:"100%",
+    paddingHorizontal:"5%",
+  },
+  score:{
+    fontFamily:"AlmaraiBold",
+    fontSize:20
+  },
+  diamond:{
+    width:25,
+    height:25,
+    marginLeft:10,
   },
   card: {
     width: "92%",
