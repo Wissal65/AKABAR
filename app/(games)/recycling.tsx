@@ -134,6 +134,9 @@ const recycling = () => {
         Alert.alert('Success!', 'You have successfully created the flower vase.');
         playVictorySound();
         handleIncrement();
+        setTimeout(() => {
+          navigation.navigate('recyclingTuto');
+        }, 5000);
       } else {
         Alert.alert('Try Again', 'You selected incorrect items.');
         playLoseSound();
@@ -149,7 +152,7 @@ const recycling = () => {
   };
 
   const navigateToNextScreen = () => {
-    navigation.navigate('calculeFacture');
+    navigation.navigate('recyclingTuto');
   };
 
   return (
@@ -165,7 +168,7 @@ const recycling = () => {
         stopTimerRef={stopTimerRef}
       /> 
         <View style={styles.overlay1}>
-          <Text style={styles.question}>ماذا يمكننا ان نصنع من هذه القنينة ؟</Text>
+          <Text style={styles.question}> ماهي الأدوات التي نحتاجها لصناعة هده المزهرية بإستعمال هده القنينة البيضاء</Text>
         </View>
         <Image 
           source={require('../../assets/images/icons/bottle.png')} 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ImageBackground, Dimensions } from 'react-native';
-import image from '../../assets/images/screens/sick.jpg';
+import image from '@/assets/images/screens/sick.jpg';
 import FlipCard from 'react-native-flip-card';
 import { Audio } from 'expo-av';
 import CountdownTimer from '../../components/CountdownTimer';
@@ -139,7 +139,7 @@ const Game1 = () => {
       }
       setTimeout(() => {
         navigation.navigate('recycling');
-      }, 5000);
+      }, 4000);
     } else {
       Alert.alert('Try Again', 'The answer is incorrect.');
       playLoseSound();

@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { closeModal } from '../store/reducer/ui/ModalSlice';
+import { closeAssisModal } from '@/store/reducer/ui/MdalAssistantSlice';
 import LottieView from 'lottie-react-native';
 
 const ModalAssistant = () => {
@@ -14,7 +14,7 @@ const ModalAssistant = () => {
       transparent
       visible={isOpen}
       animationType="slide"
-      onRequestClose={() => dispatch(closeModal())}
+      onRequestClose={() => dispatch(closeAssisModal())}
     >
       <View style={styles.modalOverlay}>
         <LottieView 
@@ -25,7 +25,7 @@ const ModalAssistant = () => {
         />
         <View style={styles.modalContainer}>
           <Text style={styles.modalText}>{modalText}</Text>
-          <TouchableOpacity style={styles.button} onPress={() => dispatch(closeModal())}>
+          <TouchableOpacity style={styles.button} onPress={() => dispatch(closeAssisModal())}>
             <Text style={styles.buttonText}>حسنا</Text>
           </TouchableOpacity>
         </View>
