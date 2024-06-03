@@ -190,7 +190,7 @@ const Game1 = () => {
         </FlipCard>
       </View>
       <View style={styles.hintTextContainer}>
-        <Text style={styles.hintText}>أقوم بتشخيص نوع حساسية المريض فمن أكون:</Text>
+        <Text style={styles.hintText}>أقوم بوضع البرامج البيئية وأقترح حلولا للقضايا البيئية فمن اكون</Text>
       </View>
       <View style={styles.answerContainer}>
         {selectedLetters.map((letter, index) => (
