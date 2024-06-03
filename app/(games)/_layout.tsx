@@ -37,6 +37,15 @@ export default function TabLayout() {
           ),
         }}
       />
+       <Tabs.Screen
+        name="tri_game"
+        options={{
+          title: 'tri_game',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

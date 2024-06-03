@@ -11,6 +11,6 @@ const styles = StyleSheet.create({
   icon:{
     backgroundColor:"white",
     padding:15,
-    borderRadius:50
+    borderRadius:50,
   }
 });
