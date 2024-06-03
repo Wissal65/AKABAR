@@ -46,6 +46,24 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="puzzle_game"
+        options={{
+          title: 'puzzle_game',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
+       <Tabs.Screen
+        name="flip_game"
+        options={{
+          title: 'puzzle_game',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
