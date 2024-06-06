@@ -64,6 +64,44 @@ export default function TabLayout() {
           ),
         }}
       />
+        <Tabs.Screen
+        name="game1_1"
+        options={{
+          title: 'game1_1',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
+              <Tabs.Screen
+        name="game1_2"
+        options={{
+          title: 'game1_2',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
+                    <Tabs.Screen
+        name="game1_3"
+        options={{
+          title: 'game1_3',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
+                    <Tabs.Screen
+        name="game2"
+        options={{
+          title: 'game2',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
     </Tabs>
+    
+
   );
 }
