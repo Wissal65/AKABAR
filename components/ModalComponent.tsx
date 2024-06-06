@@ -4,11 +4,14 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { closeModal } from '../store/reducer/ui/ModalSlice';
 import LottieView from 'lottie-react-native';
-
+import { useNavigation } from 'expo-router';
 const ModalComponent = () => {
   const dispatch = useDispatch();
-  const { isOpen, modalText } = useSelector((state) => state.modal);
-
+  const { isOpen, modalText, navigateTo } = useSelector((state) => state.modal);
+ const navigate = useNavigation();
+  const handelNavigate=()=>{
+    navigate.navigate(navigateTo);
+  }
   return (
     <Modal
       transparent
@@ -25,7 +28,7 @@ const ModalComponent = () => {
         />
         <View style={styles.modalContainer}>
           <Text style={styles.modalText}>{modalText}</Text>
-          <TouchableOpacity style={styles.button} onPress={() => dispatch(closeModal())}>
+          <TouchableOpacity style={styles.button} onPress={() => {dispatch(closeModal()); handelNavigate()}}>
             <Text style={styles.buttonText}>حسنا</Text>
           </TouchableOpacity>
         </View>
@@ -57,16 +60,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
+    fontFamily:"AlmaraiRegular"
   },
   button: {
     backgroundColor: '#FFD700',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
+    textShadowColor: 'black', // Shadow color
+    textShadowOffset: { width: -1, height: 1 }, // Shadow offset
+    textShadowRadius: 1, // Shadow radius
+    fontFamily:"AlmaraiExtraBold"
   },
 });
 

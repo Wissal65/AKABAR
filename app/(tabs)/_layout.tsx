@@ -15,7 +15,7 @@ export default function TabLayout() {
       }}
       >
       <Tabs.Screen
-      name="cardSlider"
+      name="recycling"
       options={{
         title: 'home',
         tabBarIcon: ({ focused, color, size }) => (

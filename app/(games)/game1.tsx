@@ -4,10 +4,10 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ImageBackground
 import image from '@/assets/images/screens/sick.jpg';
 import FlipCard from 'react-native-flip-card';
 import { Audio } from 'expo-av';
-import CountdownTimer from '../../components/CountdownTimer';
 import { getScore, incrementScore } from '../../hooks/scoreManager';
 import { useDispatch } from 'react-redux';
 import { openModal } from '@/store/reducer/ui/ModalSlice';
+import Timer from '@/components/Timer';
 
 const { width: initialWidth, height: initialHeight } = Dimensions.get('window');
 
@@ -15,9 +15,6 @@ const Game1 = () => {
   const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const timerRef = useRef(null);
-  const stopTimerRef = useRef(null);
-
   const [score, setScore] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [selectedLetters, setSelectedLetters] = useState(Array(4).fill(''));
@@ -110,7 +107,7 @@ const Game1 = () => {
   useEffect(() => { 
     const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
     const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
-
+    startTimer();
     // Hide tab bar when entering the screen
     hideTabBar();
 
@@ -133,10 +130,7 @@ const Game1 = () => {
       toggleFlip();
       playVictorySound();
       handleIncrement();
-      // Stop the timer
-      if (timerRef.current) {
-        timerRef.current.stopTimer();
-      }
+      stopTimer();
       setTimeout(() => {
         navigation.navigate('recycling');
       }, 4000);
@@ -158,14 +152,24 @@ const Game1 = () => {
     navigation.navigate('recycling'); // Replace 'NextScreenName' with the name of your next screen
   };
 
+  const timerRef = useRef();
+
+  const startTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.startTimer();
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.stopTimer();
+    }
+  };
   return (
     <ImageBackground source={image} resizeMode="cover" style={[styles.container, { width: dimensions.width, height: dimensions.height }]}>
-       <CountdownTimer
-        totalDuration={10}
-        onEnd={() => handleOpenModal('Welcome to the recycling game')}
-        navigateTo={navigateToNextScreen}
-        stopTimerRef={stopTimerRef}
-      /> 
+      <View style={styles.timer}>
+        <Timer ref={timerRef} duration={10} nextScreen={"recycling"} /> 
+      </View>
       <View style={styles.card}>
         <FlipCard
           friction={6}
@@ -222,7 +226,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     backgroundColor: '#f5f5f5',
     padding: 10,
   },
@@ -239,8 +243,15 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: "#FFBE0B"
   },
+  timer:{
+    width:"100%",
+    alignItems:"flex-end",
+    marginTop:"4%",
+    paddingRight:"4%",
+  },
   card: {
     height: 285,
+    marginTop:41,
   },
   silhouetteImage: {
     width: 150,
@@ -309,20 +320,33 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
     backgroundColor: "#FFBE0B",
-    borderRadius: 50,
+    borderRadius: 8,
     paddingHorizontal: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   button2: {
     marginTop: 20,
     padding: 10,
     backgroundColor: "#FF5555",
-    borderRadius: 50,
+    borderRadius: 8,
     paddingHorizontal: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
-    fontFamily: "AlmaraiBold"
+    fontFamily: "AlmaraiBold",
+    textShadowColor: 'black', // Shadow color
+    textShadowOffset: { width: -1, height: 1 }, // Shadow offset
+    textShadowRadius: 1, // Shadow radius
   },
   score: {
     fontSize: 20,

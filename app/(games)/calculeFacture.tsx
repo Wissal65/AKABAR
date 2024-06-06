@@ -124,9 +124,7 @@ const calculeFacture = () => {
     >
       <CountdownTimer
         totalDuration={30}
-        onEnd={handleOpenModal}
         navigateTo={navigateToNextScreen}
-        stopTimerRef={stopTimerRef}
       />
       <View style={styles.descriptionContainer}>
         <Text style={{fontFamily:"AlmaraiLight"}}>انقر على الصورة للتكبير</Text>
@@ -265,6 +263,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
+    textShadowColor: 'black', // Shadow color
+    textShadowOffset: { width: -1, height: 1 }, // Shadow offset
+    textShadowRadius: 1, // Shadow radius
   },
   buttonText: {
     fontSize: 18,

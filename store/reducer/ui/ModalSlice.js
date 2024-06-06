@@ -7,6 +7,7 @@ const modalSlice = createSlice({
     isOpen: false,
     componentName: '',
     modalText: '',
+    navigateTo:''
 
   },
   reducers: {
@@ -14,6 +15,7 @@ const modalSlice = createSlice({
       state.isOpen = true;
       state.componentName = action.payload.componentName;
       state.modalText = action.payload.modalText || ''; // Capture the text
+      state.navigateTo = action.payload.navigateTo;
 
     },
     closeModal: (state) => {

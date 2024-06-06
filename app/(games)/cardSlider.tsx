@@ -5,6 +5,7 @@ import { Audio } from 'expo-av';
 import backgrond from '@/assets/images/screens/screen2.jpg';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { ColorProperties } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
+import { useNavigation } from 'expo-router';
 const { width: initialWidth, height: initialHeight } = Dimensions.get('window');
 
 const { width } = Dimensions.get('window');
@@ -15,10 +16,21 @@ const cards = [
 
   ];
 const cardSlider = () => {
+  const navigation = useNavigation();
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const translateX = useSharedValue(-42);
   const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
   const soundRef = useRef(new Audio.Sound());
+  useEffect(() => {
+    const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
+    const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
+
+    hideTabBar();
+
+    return () => showTabBar();
+  }, [navigation]);
+
   useEffect(() => {
     playSound(cards[currentIndex].sound);
 

@@ -13,7 +13,9 @@ export default function RootLayout() {
     AlmaraiExtraBold: require('../assets/fonts/Almarai-ExtraBold.ttf'),
     AlmaraiBold: require('../assets/fonts/Almarai-Bold.ttf'),
     AlmaraiLight: require('../assets/fonts/Almarai-Light.ttf'),
-
+    AlmaraiRegular: require('../assets/fonts/Almarai-Regular.ttf'),
+    TajwalBold: require('../assets/fonts/Tajawal-Bold.ttf'),
+    TajwaMedium: require('../assets/fonts/Tajawal-Medium.ttf'),
   });
 
   useEffect(() => {

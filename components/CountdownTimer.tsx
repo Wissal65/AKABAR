@@ -5,24 +5,16 @@ import { useDispatch } from 'react-redux';
 import { openModal } from '../store/reducer/ui/ModalSlice';
 import * as Progress from 'react-native-progress';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-const CountdownTimer = ({ totalDuration, onEnd, navigateTo, stopTimerRef }) => {
+const CountdownTimer = ({ totalDuration, navigateTo}) => {
   const dispatch = useDispatch();
   const [timeLeft, setTimeLeft] = useState(totalDuration);
   const [progress, setProgress] = useState(1);
   const intervalRef = useRef(null);
-  const handleOpenModal = (text) => {
-    dispatch(openModal({ componentName: 'YourComponentName', modalText: text }));
-  };
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(intervalRef.current);
-          if (onEnd) {
-            onEnd();
-          } else {
-            handleOpenModal("للأسف إنته الوقت");
-          }
           if (navigateTo) {
             navigateTo();
           }
@@ -33,21 +25,11 @@ const CountdownTimer = ({ totalDuration, onEnd, navigateTo, stopTimerRef }) => {
     }, 1000);
 
     return () => clearInterval(intervalRef.current);
-  }, [dispatch, onEnd, navigateTo]);
+  }, [dispatch, navigateTo]);
 
   useEffect(() => {
     setProgress(timeLeft / totalDuration);
   }, [timeLeft, totalDuration]);
-
-  // Stop timer function
-  const stopTimer = () => {
-    clearInterval(intervalRef.current);
-  };
-
-  // Expose stopTimer function via ref
-  if (stopTimerRef) {
-    stopTimerRef.current = stopTimer;
-  }
 
   return (
     <View style={styles.container}>

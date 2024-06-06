@@ -28,6 +28,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="cardSlider"
+        options={{
+          title: 'tuto',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+          ),
+        }}
+      />
        <Tabs.Screen
         name="calculeFacture"
         options={{

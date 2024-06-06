@@ -1,5 +1,5 @@
-import {View,Text, Image, StyleSheet, Platform,TouchableOpacity,Button } from 'react-native';
-import { useEffect ,useState} from 'react';
+import {View,Text, Image, StyleSheet, Platform,TouchableOpacity,Button} from 'react-native';
+import { useEffect ,useRef,useState} from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -10,13 +10,14 @@ import { openModal } from '@/store/reducer/ui/ModalSlice';
 import { openAssisModal } from '@/store/reducer/ui/MdalAssistantSlice';
 import { useDispatch } from 'react-redux';
 import diamond from "@/assets/images/icons/diamond.png";
+import TrushCapacity from '@/components/trushCapacity';
+import Timer from '@/components/Timer';
 SplashScreen.preventAutoHideAsync();
-
  const HomeScreen=()=> {
   const dispatch = useDispatch();
 
   const handleOpenModal = () => {
-    dispatch(openModal({ componentName: 'YourComponentName' }));
+    dispatch(openModal({ componentName: 'YourComponentName',modalText:"hello" }));
   };
   const navigation = useNavigation();
 
@@ -33,6 +34,31 @@ SplashScreen.preventAutoHideAsync();
 
     loadScore();
   }, []);
+      
+    const [progress, setProgress] = useState(0);
+    const segments = [
+      { color: '#F95050' }, { color: '#F95050' }, { color: '#F95050' },
+      { color: '#ECB575' }, { color: '#ECB575' }, { color: '#E4BA47' },
+      { color: '#E4BA47' }, { color: '#E4BA47' }, { color: '#63D447' },
+      { color: '#6DEF4C' }, { color: '#5CFF33' }
+    ];
+  
+    const handleIncrement = () => {
+      setProgress((prev) => (prev < segments.length ? prev + 1 : prev));
+    };
+  const timerRef = useRef();
+
+  const startTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.startTimer();
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.stopTimer();
+    }
+  };
   return (
   
   <View style={styles.container}>
@@ -97,6 +123,9 @@ SplashScreen.preventAutoHideAsync();
         </View>
       </LinearGradient>
       </TouchableOpacity>
+      <Timer ref={timerRef} duration={5} nextScreen={'setting'}/>
+      <Button title="Start Timer" onPress={startTimer} />
+      <Button title="stop Timer" onPress={stopTimer} />
       <Button title="Open Modal" onPress={handleOpenModal} />
       <ModalComponent />
     </View>

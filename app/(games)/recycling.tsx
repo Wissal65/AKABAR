@@ -7,9 +7,9 @@ import { Audio } from 'expo-av';
 import { useDispatch } from 'react-redux';
 import { openModal } from '@/store/reducer/ui/ModalSlice';
 import { getScore, incrementScore } from '../../hooks/scoreManager';
+import Timer from '@/components/Timer';
 
 const { width: initialWidth, height: initialHeight } = Dimensions.get('window');
-
 const recycling = () => {
   const [clickSound, setClickSound] = useState();
   const [victorySound, setVictorySound] = useState();
@@ -17,9 +17,6 @@ const recycling = () => {
   const [score, setScore] = useState(0);
   const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
   const [selectedItems, setSelectedItems] = useState([]);
-  
-  const timerRef = useRef(null);
-  const stopTimerRef = useRef(null);
 
   const items = [
     { id: 'scissors', label: 'Scissors', icon: require('../../assets/images/icons/ciseaux.png') },
@@ -108,7 +105,7 @@ const recycling = () => {
   useEffect(() => {
     const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
     const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
-
+    startTimer();
     hideTabBar();
 
     return () => showTabBar();
@@ -134,8 +131,9 @@ const recycling = () => {
         Alert.alert('Success!', 'You have successfully created the flower vase.');
         playVictorySound();
         handleIncrement();
+        stopTimer();
         setTimeout(() => {
-          navigation.navigate('recyclingTuto');
+          navigation.navigate('cardSlider');
         }, 5000);
       } else {
         Alert.alert('Try Again', 'You selected incorrect items.');
@@ -152,27 +150,37 @@ const recycling = () => {
   };
 
   const navigateToNextScreen = () => {
-    navigation.navigate('recyclingTuto');
+    navigation.navigate('cardSlider');
   };
 
+  const timerRef = useRef();
+
+  const startTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.startTimer();
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.stopTimer();
+    }
+  };
   return (
     <ImageBackground 
       source={backgrond} 
       style={[styles.background, { width: dimensions.width, height: dimensions.height }]}
     >
       <View style={styles.overlay}>
-      <CountdownTimer
-        totalDuration={10}
-        onEnd={() => handleOpenModal('Welcome to the facturation game')}
-        navigateTo={navigateToNextScreen}
-        stopTimerRef={stopTimerRef}
-      /> 
-        <View style={styles.overlay1}>
+      <View style={styles.timer}>
+        <Timer ref={timerRef} duration={500} nextScreen={"cardSlider"}/> 
+      </View>        
+      <View style={styles.overlay1}>
           <Text style={styles.question}> ماهي الأدوات التي نحتاجها لصناعة هده المزهرية بإستعمال هده القنينة البيضاء</Text>
         </View>
         <Image 
           source={require('../../assets/images/icons/bottle.png')} 
-          style={styles.bottle}
+          style={[styles.bottle,{marginTop:dimensions.height*0.08}]}
         />
         <View style={styles.options}>
           {items.map(item => (
@@ -189,8 +197,9 @@ const recycling = () => {
           ))}
         </View>
         <TouchableOpacity style={styles.button} onPress={checkSelection}>
-          <Text style={styles.buttonText}>Vérifier</Text>
+          <Text style={styles.buttonText}>تحقق</Text>
         </TouchableOpacity>
+
       </View>
     </ImageBackground>
   );
@@ -200,8 +209,12 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: 'cover',
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  timer:{
+    width:"100%",
+    alignItems:"flex-end",
+    marginTop:"4%",
+    paddingRight:"4%",
   },
   selectedItem: {
     borderColor: '#3A86FF',
@@ -214,9 +227,9 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     width: '100%',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    marginTop: -50
+    marginTop: -0
   },
   overlay1: {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -226,14 +239,15 @@ const styles = StyleSheet.create({
     borderColor: "#FFBE0B",
     borderTopWidth: 7,
     borderBottomWidth: 7,
-    marginBottom: 50,
+    marginBottom: 20,
   },
   question: {
-    fontSize: 24,
+    fontSize: 22,
     color: 'black',
     textAlign: 'center',
-    margin: 35,
-    fontFamily: "AlmaraiBold"
+    margin: 15,
+    fontFamily: "AlmaraiBold",
+    lineHeight:40,
   },
   bottle: {
     width: 100,
@@ -258,14 +272,26 @@ const styles = StyleSheet.create({
     height: 50,
   },
   button: {
-    marginTop: 20,
+    backgroundColor: '#FFD700',
     padding: 10,
-    backgroundColor: 'blue',
-    borderRadius: 5,
+    borderRadius: 8,
+    width: 300,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
+    fontFamily:"AlmaraiExtraBold",
+    textShadowColor: 'black', // Shadow color
+    textShadowOffset: { width: -0.5, height: 0.5 }, // Shadow offset
+    textShadowRadius: 1, // Shadow radius
   },
 });
 
