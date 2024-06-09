@@ -19,7 +19,7 @@ type ImageWithZones = {
 
 const imagesWithZones: ImageWithZones[] = [
   {
-    image: require('@/assets/images/back_prob.png'),
+    image: require('@/assets/images/prob1.png'),
     zones: [
       { cx: 0.79, cy: 0.32, radius: 0.14, color: 'rgba(0, 255, 0, 0)' },
       { cx: 0.8, cy: 0.49, radius: 0.13, color: 'rgba(255, 255, 0, 0)' },
@@ -27,7 +27,7 @@ const imagesWithZones: ImageWithZones[] = [
   },
   
   {
-    image: require('@/assets/images/back_prob2.png'),
+    image: require('@/assets/images/prob2.png'),
     zones: [
         { cx: 0.2, cy: 0.56, radius: 0.12, color: 'rgba(0, 255, 0, 0)' },
         { cx: 0.12, cy: 0.46, radius: 0.06, color: 'rgba(255, 255, 0, 0)' },
@@ -36,7 +36,7 @@ const imagesWithZones: ImageWithZones[] = [
   },
   
   {
-    image: require('@/assets/images/back_prob3.png'),
+    image: require('@/assets/images/prob3.png'),
     zones: [
         { cx: 0.32, cy: 0.64, radius: 0.14, color: 'rgba(0, 255, 0, 0)' },
         { cx: 0.48, cy: 0.32, radius: 0.14, color: 'rgba(255, 255, 0, 0)' },
@@ -44,14 +44,14 @@ const imagesWithZones: ImageWithZones[] = [
     ],
   },
   {
-    image: require('@/assets/images/back_prob4.png'),
+    image: require('@/assets/images/prob4.png'),
     zones: [
         { cx: 0.32, cy: 0.54, radius: 0.148, color: 'rgba(0, 255, 0, 0)' },
 
     ],
   },
   {
-    image: require('@/assets/images/back_prob5.png'),
+    image: require('@/assets/images/prob5.png'),
     zones: [
         { cx: 0.32, cy: 0.54, radius: 0.148, color: 'rgba(0, 255, 0, 0)' },
 
