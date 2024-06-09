@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ImageBackground, Image, TouchableOpacity, Text, Animated } from 'react-native';
+import { StyleSheet, View, ImageBackground, Image, TouchableOpacity, Text, Animated, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const App = () => {
   const navigation = useNavigation();
@@ -17,10 +21,7 @@ const App = () => {
   const [clickSound, setClickSound] = useState<Audio.Sound | null>(null);
   const [disappearSound, setDisappearSound] = useState<Audio.Sound | null>(null);
   const [appearSound, setAppearSound] = useState<Audio.Sound | null>(null);
-  const [showOverlay, setShowOverlay] = useState(false);
-  const [showGameOverDiv, setShowGameOverDiv] = useState(false);
-  const [gameOverDivOpacity] = useState(new Animated.Value(0));
-  const [gameOverImagePosition] = useState(new Animated.Value(0));
+  const [trashIcons, setTrashIcons] = useState<boolean[]>([true, true, true]);
 
   useEffect(() => {
     const loadSounds = async () => {
@@ -60,25 +61,18 @@ const App = () => {
   const handleTrashClick = (trashNumber: Number) => {
     if (!gameOver) {
       playSound(clickSound);
-      // setTrashesClicked((prevTrashesClicked) => {
-      //   const newTrashesClicked = prevTrashesClicked + 1;
-      //   if (newTrashesClicked === 3) {
-      //     handleGameOver();
-      //   }
-      //   return newTrashesClicked;
-      // });
-      
       if (trashNumber === 1) {
-        animateTrash(trash1Opacity);
+        animateTrash(trash1Opacity, 0);
       } else if (trashNumber === 2) {
-        animateTrash(trash2Opacity);
+        animateTrash(trash2Opacity, 1);
       } else if (trashNumber === 3) {
-        animateTrash(trash3Opacity);
+        animateTrash(trash3Opacity, 2);
       }
     }
   };
 
-  const animateTrash = (opacity:Animated.Value) => {
+
+  const animateTrash = (opacity: Animated.Value, iconIndex: number) => {
     Animated.timing(opacity, {
       toValue: 0,
       duration: 500,
@@ -86,8 +80,12 @@ const App = () => {
     }).start(() => {
       console.log('Animation completed');
       playSound(disappearSound);
-       // Increment trashesClicked after the animation is complete
-       setTrashesClicked((prevTrashesClicked) => {
+      setTrashIcons((prevTrashIcons) => {
+        const newTrashIcons = [...prevTrashIcons];
+        newTrashIcons[iconIndex] = false;
+        return newTrashIcons;
+      });
+      setTrashesClicked((prevTrashesClicked) => {
         const newTrashesClicked = prevTrashesClicked + 1;
         setScore(newTrashesClicked);
         if (newTrashesClicked === 3) {
@@ -102,35 +100,17 @@ const App = () => {
     setGameOver(true);
     const finalScore = trashesClicked + timeLeft;
     setScore(finalScore);
-    setShowOverlay(true);
-    setShowGameOverDiv(true);
     try {
       await AsyncStorage.setItem('score', score.toString());
       console.log('Score saved successfully.');
     } catch (error) {
       console.error('Error saving score:', error);
     }
-
-    // Show the game over message with animation
-    Animated.timing(gameOverDivOpacity, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start(() => {
-      playSound(appearSound);
-    });
-
-    // Animate the game over image position
-    Animated.timing(gameOverImagePosition, {
-      toValue: 100, // Adjust as needed
-      duration: 1000, // Adjust as needed
-      useNativeDriver: true,
-    }).start();
-    // Navigate to the new screen after 10 seconds
-    setTimeout(() => {
-      // navigation.navigate('NewScreen');
-      router.push("/game1_2");
-    }, 10000);
+    if (trashesClicked === 3) {
+      setTimeout(() => {
+          router.push("/game1_2");
+        }, 1000);
+    }
   };
 
 
@@ -150,25 +130,27 @@ const App = () => {
     <View style={styles.container}>
       <ImageBackground
         source={require('@/assets/images/back1.png')}
-        style={styles.backgroundImage}
+        style={[styles.backgroundImage,
+           { width: windowWidth, height: windowHeight,}
+          ]}
       >
-        {/* Overlay */}
-        {showOverlay && (
-          <View style={styles.overlay} />
-        )}
-
         <TouchableOpacity style={styles.container} onPress={handleScreenClick} activeOpacity={1}>
-          {/* Game Over Div */}
-          {showGameOverDiv && (
-            <Animated.View style={[styles.gameOverDiv, { opacity: gameOverDivOpacity }]}>
-              <Animated.Image
-                source={require('@/assets/images/A2.png')}
-                style={[styles.gameOverImage, { transform: [{ translateY: gameOverImagePosition }] }]}
-              />
-            </Animated.View>
-          )}
 
-          <Animated.View style={[styles.trash, { top: '52%', left: '27%', opacity: trash1Opacity }]}>
+           <View style={styles.detectedZonesContainer}>
+            {trashIcons.map((visible, index) => (
+              visible ? (
+                <Icon
+                  key={index}
+                  name="trash"
+                  size={windowWidth * 0.05}
+                  color="green"
+                  style={{ marginHorizontal: 5 }}
+                />
+              ) : null
+            ))}
+          </View>
+
+          <Animated.View style={[ { top: windowHeight * 0.54, left: windowWidth * 0.27, opacity: trash1Opacity }]}>
             <TouchableOpacity onPress={() => handleTrashClick(1)}>
               <Image
                 source={require('@/assets/images/trash4.png')}
@@ -177,7 +159,8 @@ const App = () => {
             </TouchableOpacity>
           </Animated.View>
 
-          <Animated.View style={[styles.trash, { top: '65%', left: '73%', opacity: trash2Opacity }]}>
+
+          <Animated.View style={[ { top: windowHeight * 0.66, left: windowWidth * 0.73, opacity: trash2Opacity }]}>
             <TouchableOpacity onPress={() => handleTrashClick(2)}>
               <Image
                 source={require('@/assets/images/paper_trash.png')}
@@ -186,7 +169,7 @@ const App = () => {
             </TouchableOpacity>
           </Animated.View>
 
-          <Animated.View style={[styles.trash2, { top: '67%', right: '49%', opacity: trash3Opacity }]}>
+          <Animated.View style={[ { top: windowHeight * 0.7, left: windowWidth * 0.05, opacity: trash3Opacity }]}>
             <TouchableOpacity onPress={() => handleTrashClick(3)}>
               <Image
                 source={require('@/assets/images/trash4.png')}
@@ -195,7 +178,7 @@ const App = () => {
             </TouchableOpacity>
           </Animated.View>
 
-          <Text style={styles.scoreText}>Score: {score}</Text>
+          {/* <Text style={styles.scoreText}>Score: {score}</Text> */}
           <Text style={styles.timeText}>Time Left: {timeLeft}</Text>
         </TouchableOpacity>
       </ImageBackground>
@@ -213,52 +196,54 @@ const styles = StyleSheet.create({
   },
   trash: {
     position: 'absolute',
-    width: 65,
-    height: 60,
+    // width: 65,
+    // height: 60,
+    width: windowWidth * 0.13, 
+    height: (windowWidth * 0.13)/(705 / 647), 
+  
   },
 
   paper_trash: {
     position: 'absolute',
-    width: 90,
-    height: 60,
+    // width: 90,
+    // height: 60,
+    width: windowWidth * 0.27, 
+    height: (windowWidth * 0.27)/(181 / 102), 
   },
   trash2: {
     position: 'absolute',
-    width: 164,
-    height: 160,
+    // width: 164,
+    // height: 160,
+    width: windowWidth * 0.5, 
+    height: (windowWidth * 0.5)/(705 / 647), 
   },
   scoreText: {
     position: 'absolute',
-    top: 20,
-    left: 10,
+    top: windowHeight * 0.03,
+    left: windowWidth * 0.05,
     color: 'white',
     fontSize: 20,
   },
   timeText: {
     position: 'absolute',
-    top: 20,
-    right: 10,
+    top: windowHeight * 0.03,
+    right: windowWidth * 0.05,
     color: 'white',
     fontSize: 20,
   },
-  gameOverDiv: {
+  detectedZonesContainer: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  gameOverImage: {
-    width: 250,
-    height: 350,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
+    top: windowHeight * 0.03,
+    left: windowWidth * 0.05,
+    flexDirection: 'row',
     backgroundColor: 'black',
-    opacity: 0.5,
+    opacity: 0.55,
+    padding: 6,
+    borderRadius: 31,
+    gap: 3
   },
+
 });
 
 export default App;
+
