@@ -18,16 +18,16 @@ const App = () => {
   const [trash1Opacity] = useState(new Animated.Value(1));
   const [trash2Opacity] = useState(new Animated.Value(1));
   const [trash3Opacity] = useState(new Animated.Value(1));
+  const [iconOpacities] = useState([new Animated.Value(0.3), new Animated.Value(0.3), new Animated.Value(0.3)]);
   const [clickSound, setClickSound] = useState<Audio.Sound | null>(null);
   const [disappearSound, setDisappearSound] = useState<Audio.Sound | null>(null);
   const [appearSound, setAppearSound] = useState<Audio.Sound | null>(null);
-  const [trashIcons, setTrashIcons] = useState<boolean[]>([true, true, true]);
 
   useEffect(() => {
     const loadSounds = async () => {
-      const { sound: click } = await Audio.Sound.createAsync(require('@/assets/audio/tap.mp3'));
-      const { sound: disappear } = await Audio.Sound.createAsync(require('@/assets/audio/disappear.wav'));
-      const { sound: appear } = await Audio.Sound.createAsync(require('@/assets/audio/appear.wav'));
+      const { sound: click } = await Audio.Sound.createAsync(require('@/assets/tap.mp3'));
+      const { sound: disappear } = await Audio.Sound.createAsync(require('@/assets/disappear.wav'));
+      const { sound: appear } = await Audio.Sound.createAsync(require('@/assets/appear.wav'));
       setClickSound(click);
       setDisappearSound(disappear);
       setAppearSound(appear);
@@ -58,7 +58,7 @@ const App = () => {
     playSound(clickSound);
   };
 
-  const handleTrashClick = (trashNumber: Number) => {
+  const handleTrashClick = (trashNumber: number) => {
     if (!gameOver) {
       playSound(clickSound);
       if (trashNumber === 1) {
@@ -71,20 +71,18 @@ const App = () => {
     }
   };
 
-
   const animateTrash = (opacity: Animated.Value, iconIndex: number) => {
     Animated.timing(opacity, {
       toValue: 0,
       duration: 500,
       useNativeDriver: true,
     }).start(() => {
-      console.log('Animation completed');
       playSound(disappearSound);
-      setTrashIcons((prevTrashIcons) => {
-        const newTrashIcons = [...prevTrashIcons];
-        newTrashIcons[iconIndex] = false;
-        return newTrashIcons;
-      });
+      Animated.timing(iconOpacities[iconIndex], {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
       setTrashesClicked((prevTrashesClicked) => {
         const newTrashesClicked = prevTrashesClicked + 1;
         setScore(newTrashesClicked);
@@ -106,13 +104,13 @@ const App = () => {
     } catch (error) {
       console.error('Error saving score:', error);
     }
+
     if (trashesClicked === 3) {
       setTimeout(() => {
-          router.push("/game1_2");
-        }, 1000);
+        router.push("/game1_2");
+      }, 1000);
     }
   };
-
 
   useEffect(() => {
     if (timeLeft === 0 || gameOver) {
@@ -130,27 +128,23 @@ const App = () => {
     <View style={styles.container}>
       <ImageBackground
         source={require('@/assets/images/back1.png')}
-        style={[styles.backgroundImage,
-           { width: windowWidth, height: windowHeight,}
-          ]}
+        style={[styles.backgroundImage, { width: windowWidth, height: windowHeight }]}
       >
         <TouchableOpacity style={styles.container} onPress={handleScreenClick} activeOpacity={1}>
-
-           <View style={styles.detectedZonesContainer}>
-            {trashIcons.map((visible, index) => (
-              visible ? (
+          <View style={styles.detectedZonesContainer}>
+            {iconOpacities.map((opacity, index) => (
+              <Animated.View key={index} style={{ opacity }}>
                 <Icon
-                  key={index}
                   name="trash"
                   size={windowWidth * 0.05}
                   color="green"
                   style={{ marginHorizontal: 5 }}
                 />
-              ) : null
+              </Animated.View>
             ))}
           </View>
 
-          <Animated.View style={[ { top: windowHeight * 0.54, left: windowWidth * 0.27, opacity: trash1Opacity }]}>
+          <Animated.View style={[{ top: windowHeight * 0.54, left: windowWidth * 0.27, opacity: trash1Opacity }]}>
             <TouchableOpacity onPress={() => handleTrashClick(1)}>
               <Image
                 source={require('@/assets/images/trash4.png')}
@@ -159,8 +153,7 @@ const App = () => {
             </TouchableOpacity>
           </Animated.View>
 
-
-          <Animated.View style={[ { top: windowHeight * 0.66, left: windowWidth * 0.73, opacity: trash2Opacity }]}>
+          <Animated.View style={[{ top: windowHeight * 0.66, left: windowWidth * 0.73, opacity: trash2Opacity }]}>
             <TouchableOpacity onPress={() => handleTrashClick(2)}>
               <Image
                 source={require('@/assets/images/paper_trash.png')}
@@ -169,7 +162,7 @@ const App = () => {
             </TouchableOpacity>
           </Animated.View>
 
-          <Animated.View style={[ { top: windowHeight * 0.7, left: windowWidth * 0.05, opacity: trash3Opacity }]}>
+          <Animated.View style={[{ top: windowHeight * 0.7, left: windowWidth * 0.05, opacity: trash3Opacity }]}>
             <TouchableOpacity onPress={() => handleTrashClick(3)}>
               <Image
                 source={require('@/assets/images/trash4.png')}
@@ -178,7 +171,6 @@ const App = () => {
             </TouchableOpacity>
           </Animated.View>
 
-          {/* <Text style={styles.scoreText}>Score: {score}</Text> */}
           <Text style={styles.timeText}>Time Left: {timeLeft}</Text>
         </TouchableOpacity>
       </ImageBackground>
@@ -196,33 +188,18 @@ const styles = StyleSheet.create({
   },
   trash: {
     position: 'absolute',
-    // width: 65,
-    // height: 60,
-    width: windowWidth * 0.13, 
-    height: (windowWidth * 0.13)/(705 / 647), 
-  
+    width: windowWidth * 0.13,
+    height: (windowWidth * 0.13) / (705 / 647),
   },
-
   paper_trash: {
     position: 'absolute',
-    // width: 90,
-    // height: 60,
-    width: windowWidth * 0.27, 
-    height: (windowWidth * 0.27)/(181 / 102), 
+    width: windowWidth * 0.27,
+    height: (windowWidth * 0.27) / (181 / 102),
   },
   trash2: {
     position: 'absolute',
-    // width: 164,
-    // height: 160,
-    width: windowWidth * 0.5, 
-    height: (windowWidth * 0.5)/(705 / 647), 
-  },
-  scoreText: {
-    position: 'absolute',
-    top: windowHeight * 0.03,
-    left: windowWidth * 0.05,
-    color: 'white',
-    fontSize: 20,
+    width: windowWidth * 0.5,
+    height: (windowWidth * 0.5) / (705 / 647),
   },
   timeText: {
     position: 'absolute',
@@ -240,10 +217,10 @@ const styles = StyleSheet.create({
     opacity: 0.55,
     padding: 6,
     borderRadius: 31,
-    gap: 3
+    gap: 3,
   },
-
 });
 
 export default App;
+
 
