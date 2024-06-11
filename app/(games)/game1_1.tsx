@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import { useNavigation } from '@react-navigation/native';
 import { router } from 'expo-router';
-import Icon from 'react-native-vector-icons/FontAwesome';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -12,22 +11,22 @@ const windowHeight = Dimensions.get('window').height;
 const App = () => {
   const navigation = useNavigation();
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(50); // 50 seconds timer
+  const [timeLeft, setTimeLeft] = useState(100); // 50 seconds timer
   const [gameOver, setGameOver] = useState(false);
   const [trashesClicked, setTrashesClicked] = useState(0);
   const [trash1Opacity] = useState(new Animated.Value(1));
   const [trash2Opacity] = useState(new Animated.Value(1));
   const [trash3Opacity] = useState(new Animated.Value(1));
-  const [iconOpacities] = useState([new Animated.Value(0.3), new Animated.Value(0.3), new Animated.Value(0.3)]);
+  const [iconOpacities] = useState([new Animated.Value(0.6), new Animated.Value(0.6), new Animated.Value(0.6)]);
   const [clickSound, setClickSound] = useState<Audio.Sound | null>(null);
   const [disappearSound, setDisappearSound] = useState<Audio.Sound | null>(null);
   const [appearSound, setAppearSound] = useState<Audio.Sound | null>(null);
 
   useEffect(() => {
     const loadSounds = async () => {
-      const { sound: click } = await Audio.Sound.createAsync(require('@/assets/tap.mp3'));
-      const { sound: disappear } = await Audio.Sound.createAsync(require('@/assets/disappear.wav'));
-      const { sound: appear } = await Audio.Sound.createAsync(require('@/assets/appear.wav'));
+      const { sound: click } = await Audio.Sound.createAsync(require('@/assets/audio/tap.mp3'));
+      const { sound: disappear } = await Audio.Sound.createAsync(require('@/assets/audio/disappear.wav'));
+      const { sound: appear } = await Audio.Sound.createAsync(require('@/assets/audio/appear.wav'));
       setClickSound(click);
       setDisappearSound(disappear);
       setAppearSound(appear);
@@ -47,6 +46,18 @@ const App = () => {
       }
     };
   }, []);
+
+  useEffect(() => { 
+    const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
+    const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
+
+    // Hide tab bar when entering the screen
+    hideTabBar();
+
+    // Show tab bar when leaving the screen
+    return () => showTabBar();
+  }, [navigation]);
+  
 
   const playSound = async (sound: Audio.Sound | null) => {
     if (sound) {
@@ -134,11 +145,9 @@ const App = () => {
           <View style={styles.detectedZonesContainer}>
             {iconOpacities.map((opacity, index) => (
               <Animated.View key={index} style={{ opacity }}>
-                <Icon
-                  name="trash"
-                  size={windowWidth * 0.05}
-                  color="green"
-                  style={{ marginHorizontal: 5 }}
+                <Image
+                  source={require('@/assets/images/trash_icon.png')} // Replace with your icon image
+                  style={styles.icon}
                 />
               </Animated.View>
             ))}
@@ -203,24 +212,27 @@ const styles = StyleSheet.create({
   },
   timeText: {
     position: 'absolute',
-    top: windowHeight * 0.03,
+    top: windowHeight * 0.05,
     right: windowWidth * 0.05,
     color: 'white',
-    fontSize: 20,
+    fontSize: 22,
   },
   detectedZonesContainer: {
     position: 'absolute',
-    top: windowHeight * 0.03,
+    top: windowHeight * 0.05,
     left: windowWidth * 0.05,
     flexDirection: 'row',
     backgroundColor: 'black',
-    opacity: 0.55,
+    opacity: 0.75,
     padding: 6,
     borderRadius: 31,
     gap: 3,
   },
+  icon: {
+    width: windowWidth * 0.04,
+    height: windowWidth * 0.045,
+    marginHorizontal: 5,
+  },
 });
 
 export default App;
-
-

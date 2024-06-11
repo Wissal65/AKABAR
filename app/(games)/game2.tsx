@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ImageBackground, TouchableWithoutFeedback, Text, Alert, Dimensions, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, ImageBackground, TouchableWithoutFeedback, Text, Alert, Dimensions, useWindowDimensions, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from 'expo-router';
 
 type CircleZone = {
   cx: number;
@@ -19,7 +20,7 @@ type ImageWithZones = {
 
 const imagesWithZones: ImageWithZones[] = [
   {
-    image: require('@/assets/images/prob1.png'),
+    image: require('@/assets/images/back_prob.png'),
     zones: [
       { cx: 0.79, cy: 0.32, radius: 0.14, color: 'rgba(0, 255, 0, 0)' },
       { cx: 0.8, cy: 0.49, radius: 0.13, color: 'rgba(255, 255, 0, 0)' },
@@ -27,7 +28,7 @@ const imagesWithZones: ImageWithZones[] = [
   },
   
   {
-    image: require('@/assets/images/prob2.png'),
+    image: require('@/assets/images/back_prob2.png'),
     zones: [
         { cx: 0.2, cy: 0.56, radius: 0.12, color: 'rgba(0, 255, 0, 0)' },
         { cx: 0.12, cy: 0.46, radius: 0.06, color: 'rgba(255, 255, 0, 0)' },
@@ -36,7 +37,7 @@ const imagesWithZones: ImageWithZones[] = [
   },
   
   {
-    image: require('@/assets/images/prob3.png'),
+    image: require('@/assets/images/back_prob3.png'),
     zones: [
         { cx: 0.32, cy: 0.64, radius: 0.14, color: 'rgba(0, 255, 0, 0)' },
         { cx: 0.48, cy: 0.32, radius: 0.14, color: 'rgba(255, 255, 0, 0)' },
@@ -44,14 +45,14 @@ const imagesWithZones: ImageWithZones[] = [
     ],
   },
   {
-    image: require('@/assets/images/prob4.png'),
+    image: require('@/assets/images/back_prob4.png'),
     zones: [
         { cx: 0.32, cy: 0.54, radius: 0.148, color: 'rgba(0, 255, 0, 0)' },
 
     ],
   },
   {
-    image: require('@/assets/images/prob5.png'),
+    image: require('@/assets/images/back_prob5.png'),
     zones: [
         { cx: 0.32, cy: 0.54, radius: 0.148, color: 'rgba(0, 255, 0, 0)' },
 
@@ -64,6 +65,7 @@ const imagesWithZones: ImageWithZones[] = [
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const App = () => {
+  const navigation = useNavigation();
   const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(50);
@@ -73,20 +75,29 @@ const App = () => {
   const [clickSound, setClickSound] = useState<Audio.Sound | null>(null);
   const [correctSound, setCorrectSound] = useState<Audio.Sound | null>(null);
   const [detectedZones, setDetectedZones] = useState<boolean[]>(new Array(imagesWithZones[0].zones.length).fill(false));
-  
+
+
+
   useEffect(() => {
-    // Load sounds
     const loadSounds = async () => {
-        const { sound: click } = await Audio.Sound.createAsync(require('@/assets/audio/tap.mp3'));
+      const { sound: click } = await Audio.Sound.createAsync(require('@/assets/audio/tap.mp3'));
       const { sound: correct } = await Audio.Sound.createAsync(require('@/assets/audio/right.mp3'));
       setClickSound(click);
       setCorrectSound(correct);
     };
-
+    useEffect(() => { 
+      const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
+      const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
+  
+      // Hide tab bar when entering the screen
+      hideTabBar();
+  
+      // Show tab bar when leaving the screen
+      return () => showTabBar();
+    }, [navigation]);
     loadSounds();
 
     return () => {
-      // Unload sounds
       if (clickSound) {
         clickSound.unloadAsync();
       }
@@ -95,21 +106,6 @@ const App = () => {
       }
     };
   }, []);
-
-//   useEffect(() => {
-//     const loadScore = async () => {
-//       try {
-//         const savedScore = await AsyncStorage.getItem('score');
-//         if (savedScore !== null) {
-//           setScore(parseInt(savedScore, 10));
-//         }
-//       } catch (error) {
-//         console.error('Failed to load score from AsyncStorage', error);
-//       }
-//     };
-
-//     loadScore();
-//   }, []);
 
   useEffect(() => {
     const saveScore = async () => {
@@ -215,13 +211,26 @@ const App = () => {
           
           <View style={styles.detectedZonesContainer}>
             {currentImageWithZones.zones.map((zone, index) => (
-              <Icon
-                key={index}
-                name="search"
-                size={windowWidth*0.05}
-                color="green"
-                style={{ opacity: selectedZones.includes(index) ? 1 : 0.7, marginHorizontal: 5 }}
-              />
+              // <Icon
+              //   key={index}
+              //   name="search"
+              //   size={windowWidth*0.05}
+              //   color="green"
+              //   style={{ opacity: selectedZones.includes(index) ? 1 : 0.7, marginHorizontal: 5 }}
+              // />
+
+        <Image
+         key={index}
+         source={require('@/assets/images/icon_loop.png')} // Replace 'your-image-path' with the path to your image
+         style={[
+        {
+          width: windowWidth * 0.05,
+          height: windowWidth * 0.05,
+          opacity: selectedZones.includes(index) ? 1 : 0.7,
+          marginHorizontal: 5,
+        },
+      ]}
+    />
             ))}
           </View>
           {/* <Text style={styles.scoreText}>Score: {score}</Text> */}
@@ -242,17 +251,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   zone: {
+    // position: 'absolute',
+    // borderWidth: 2,
+    // borderColor: 'red',
+    // backgroundColor: 'transparent',
   },
   detectedZonesContainer: {
     position: 'absolute',
-    top:  30,
-    left: 10,
+    top: windowHeight * 0.03,
+    left: windowWidth * 0.04,
     flexDirection: 'row',
     backgroundColor: 'black',
-    opacity: 0.55,
+    opacity: 0.75,
     padding: 6,
     borderRadius: 31,
-    gap: 3
+    gap: 3,
   },
   detectedZone: {
     backgroundColor: 'green',
@@ -260,18 +273,13 @@ const styles = StyleSheet.create({
 
   },
   scoreText: {
-    // position: 'absolute',
-    // top: 30,
-    // left: 10,
-    // color: 'white',
-    // fontSize: 20,
   },
   timeText: {
     position: 'absolute',
-    top: 30,
-    right: 10,
+    top: windowHeight * 0.03,
+    right: windowWidth * 0.04,
     color: 'white',
-    fontSize: 20,
+    fontSize: 22,
   },
 });
 
