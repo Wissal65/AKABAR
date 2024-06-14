@@ -15,7 +15,8 @@ export default function Question() {
 const styles = StyleSheet.create({
   question: {
     textAlign: 'center',
-    fontSize: width * 0.07, 
+    fontSize: width * 0.06, 
+    fontFamily:"AlmaraiRegular"
   },
   backQuestion: {
     position: 'absolute',

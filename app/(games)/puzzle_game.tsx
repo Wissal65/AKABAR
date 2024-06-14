@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, TouchableOpacity, Image, Dimensions, Text, Modal, ImageBackground } from 'react-native';
 import { Audio } from 'expo-av';
 import { useNavigation } from 'expo-router';
+import CountdownTimer from '@/components/CountdownTimer';
 
 const imageSource = require('../../assets/images/piece.jpg');
 const backgroundImage = require('../../assets/images/back2.jpg'); 
 const windowWidth = Dimensions.get('window').width;
+const windowheight = Dimensions.get('window').height;
 const puzzleWidth = windowWidth * 0.9; 
 const pieceSize = puzzleWidth / 3; 
 
@@ -65,7 +67,7 @@ const Explore = () => {
     setMoves(moves + 1);
 
     if (checkWin(newPieces)) {
-      setModalVisible(true); 
+      stopTimer();
     }
   };
 
@@ -81,16 +83,23 @@ const Explore = () => {
   const getPieceStyle = (index: number) => {
     const row = Math.floor(index / 3);
     const col = index % 3;
+    const isSelected = selectedPiece === index;
     return [
       styles.piece,
       {
         top: row * pieceSize,
         left: col * pieceSize,
-        backgroundColor: selectedPiece === pieces.indexOf(index) ? 'lightgreen' : 'lightblue',
+        backgroundColor: isSelected ? 'lightgreen' : 'lightblue',
+        shadowColor: isSelected ? '#000' : 'transparent',
+        shadowOffset: isSelected ? { width: 0, height: 2 } : { width: 0, height: 0 },
+        shadowOpacity: isSelected ? 0.8 : 0,
+        shadowRadius: isSelected ? 3 : 0,
+        elevation: isSelected ? 5 : 0,
+        borderWidth: isSelected ? 3 : 2,
+        borderColor: isSelected ? 'yellow' : 'black',
       },
     ];
   };
-
   const getImageStyle = (index: number) => {
     const row = Math.floor(index / 3);
     const col = index % 3;
@@ -100,21 +109,38 @@ const Explore = () => {
       left: -col * pieceSize,
       width: pieceSize * 3,
       height: pieceSize * 3,
+
     };
   };
   useEffect(() => {
     const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
     const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
-
+    startTimer();
     hideTabBar();
 
     return () => showTabBar();
   }, [navigation]);
+  const timerRef = useRef();
 
+  const startTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.startTimer();
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.stopTimer();
+    }
+  };
   return (
-    <ImageBackground source={backgroundImage} style={styles.backgroundImage}>
+    <ImageBackground source={backgroundImage} style={styles.backgroundImage} blurRadius={6}>
       <View style={styles.overlay}>
         <View style={styles.container}>
+        <View style={styles.timer}>
+          <CountdownTimer ref={timerRef} duration={90} nextScreen={"home"} />
+        </View>
+        <View style={styles.aa}>
           <View style={styles.puzzleContainer}>
             {pieces.map((index) => (
               <TouchableOpacity
@@ -125,6 +151,7 @@ const Explore = () => {
                 <Image source={imageSource} style={getImageStyle(index)} />
               </TouchableOpacity>
             ))}
+          </View>
           </View>
         </View>
         <TouchableOpacity style={styles.button} onPress={shufflePieces} >
@@ -154,17 +181,28 @@ const styles = StyleSheet.create({
   backgroundImage: {
     flex: 1,
     resizeMode: 'cover',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+  },
+  aa:{
+    height:windowheight,
+    width:windowWidth,
+    alignItems:"center",
+    marginTop:windowheight*0.15
   },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)', 
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+  },
+  timer: {
+    width: "100%",
+    alignItems: "flex-end",
+    marginTop: "7%",
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 20, 
   },

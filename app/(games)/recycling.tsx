@@ -5,9 +5,11 @@ import backgrond from '../../assets/images/screens/screen2.jpg';
 import { useNavigation } from 'expo-router';
 import { Audio } from 'expo-av';
 import { useDispatch } from 'react-redux';
-import { openModal } from '@/store/reducer/ui/ModalSlice';
 import { getScore, incrementScore } from '../../hooks/scoreManager';
 import Timer from '@/components/Timer';
+import Assistant from '@/components/Assistant';
+import { openAssistan } from '@/store/reducer/ui/AssistantSlice';
+import FlipCard from 'react-native-flip-card';
 
 const { width: initialWidth, height: initialHeight } = Dimensions.get('window');
 const recycling = () => {
@@ -28,7 +30,7 @@ const recycling = () => {
   ];
 
   const correctItems = ['scissors', 'soil', 'flower', 'bottle'];
-
+  const [isFlipped, setIsFlipped] = useState(false);
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
@@ -105,10 +107,13 @@ const recycling = () => {
   useEffect(() => {
     const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
     const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
-    startTimer();
     hideTabBar();
-
+    setTimeout(()=>{
+      toggleFlip();
+      startTimer();
+    },5000)
     return () => showTabBar();
+  
   }, [navigation]);
 
   const handleIncrement = async () => {
@@ -128,13 +133,13 @@ const recycling = () => {
   const checkSelection = () => {
     if (selectedItems.length === 4) {
       if (selectedItems.every(item => correctItems.includes(item))) {
-        Alert.alert('Success!', 'You have successfully created the flower vase.');
+        toggleFlip();
         playVictorySound();
         handleIncrement();
         stopTimer();
         setTimeout(() => {
           navigation.navigate('cardSlider');
-        }, 5000);
+        }, 2000);
       } else {
         Alert.alert('Try Again', 'You selected incorrect items.');
         playLoseSound();
@@ -143,14 +148,6 @@ const recycling = () => {
       Alert.alert('Incomplete', 'Please select three items.');
       playLoseSound();
     }
-  };
-
-  const handleOpenModal = (text) => {
-    dispatch(openModal({ componentName: 'YourComponentName', modalText: text }));
-  };
-
-  const navigateToNextScreen = () => {
-    navigation.navigate('cardSlider');
   };
 
   const timerRef = useRef();
@@ -166,22 +163,45 @@ const recycling = () => {
       timerRef.current.stopTimer();
     }
   };
+ 
+  const toggleFlip = () => {
+    setIsFlipped((prevIsFlipped) => !prevIsFlipped);
+  };
+
   return (
     <ImageBackground 
       source={backgrond} 
       style={[styles.background, { width: dimensions.width, height: dimensions.height }]}
     >
+      <Assistant onClose={startTimer} />
+
       <View style={styles.overlay}>
+        
       <View style={styles.timer}>
-        <Timer ref={timerRef} duration={500} nextScreen={"cardSlider"}/> 
+        <CountdownTimer ref={timerRef} duration={50} nextScreen={"home"}/> 
       </View>        
       <View style={styles.overlay1}>
           <Text style={styles.question}> ماهي الأدوات التي نحتاجها لصناعة هده المزهرية بإستعمال هده القنينة البيضاء</Text>
         </View>
+        <FlipCard
+          friction={6}
+          perspective={400}
+          flipHorizontal={true}
+          flipVertical={false}
+          flip={isFlipped}
+          clickable={false}
+        >
+          {/* Face Side */}
         <Image 
-          source={require('../../assets/images/icons/bottle.png')} 
-          style={[styles.bottle,{marginTop:dimensions.height*0.08}]}
+          source={require('@/assets/images/icons/tuto3.png')} 
+          style={[styles.bottle,{marginTop:dimensions.height*0.02}]}
         />
+        {/* back Side */}
+         <Image 
+          source={require('../../assets/images/icons/bottle.png')} 
+          style={[styles.bottle,{marginTop:dimensions.height*0.02}]}
+        />
+        </FlipCard>
         <View style={styles.options}>
           {items.map(item => (
             <TouchableOpacity
@@ -252,7 +272,6 @@ const styles = StyleSheet.create({
   bottle: {
     width: 100,
     height: 180,
-    marginBottom: 10,
   },
   options: {
     flexDirection: 'row',

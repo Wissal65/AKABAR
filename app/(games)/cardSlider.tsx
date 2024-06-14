@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ImageBackground ,Image} from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Audio } from 'expo-av';
@@ -7,6 +7,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { ColorProperties } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
 import { useNavigation } from 'expo-router';
 const { width: initialWidth, height: initialHeight } = Dimensions.get('window');
+import { LevelContext } from '@/hooks/ContextLevel';
 
 const { width } = Dimensions.get('window');
 const cards = [
@@ -72,7 +73,13 @@ const cardSlider = () => {
       subscription?.remove();
     };
   }, []);
-
+  const { unlockLevel } = useContext(LevelContext);
+  const levelId = 3; // Replace with the appropriate level ID for this game
+  const completeLevel = () => {
+    const nextLevel = levelId + 1;
+    unlockLevel(nextLevel);
+    navigation.navigate('finalScore'); // Navigate back to home or any other screen
+  };
   return (
     <View style={[styles.container, { width: dimensions.width, height: dimensions.height }]}>
     <ImageBackground source={backgrond}  style={styles.background} blurRadius={7}>
@@ -107,12 +114,18 @@ const cardSlider = () => {
         ))}
       </Animated.View>
       <View style={{alignItems:"center",justifyContent:"center"}}>
-        <TouchableOpacity onPress={handleNext} style={styles.button}>
+        
+        {currentIndex === 2 ? <TouchableOpacity onPress={completeLevel} style={styles.button}>
+            <Text style={styles.buttonText}>العودة</Text>
+            <View style={styles.buttonIcon}>
+                <Ionicons name="arrow-forward" color={"white"} size={30}  />
+            </View>
+        </TouchableOpacity> : <TouchableOpacity onPress={handleNext} style={styles.button}>
             <Text style={styles.buttonText}>التالي</Text>
             <View style={styles.buttonIcon}>
                 <Ionicons name="arrow-forward" color={"white"} size={30}  />
             </View>
-        </TouchableOpacity>
+        </TouchableOpacity>}
       </View>
       </ImageBackground>
     </View>

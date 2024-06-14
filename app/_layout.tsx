@@ -1,3 +1,4 @@
+// RootLayout.js
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -5,7 +6,8 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { Provider } from "react-redux";
 import { store } from '../store';
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+import { LevelProvider } from '@/hooks/ContextLevel';
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -30,11 +32,13 @@ export default function RootLayout() {
 
   return (
     <Provider store={store}>
+      <LevelProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown:false }} />
           <Stack.Screen name="+not-found" />
           <Stack.Screen name="(games)" options={{ headerShown:false }}/>
         </Stack>
+      </LevelProvider>
     </Provider>
   );
 }

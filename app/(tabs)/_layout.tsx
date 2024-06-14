@@ -2,7 +2,6 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import {StyleSheet} from "react-native"
-import ModalCompo from '@/components/ModalCompo';
 
 export default function TabLayout() {
 
@@ -15,7 +14,7 @@ export default function TabLayout() {
       }}
       >
       <Tabs.Screen
-      name="recycling"
+      name="index"
       options={{
         title: 'home',
         tabBarIcon: ({ focused, color, size }) => (

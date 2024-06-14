@@ -14,7 +14,7 @@ import { LevelContext } from '@/hooks/ContextLevel';
 
 const { width: initialWidth, height: initialHeight } = Dimensions.get('window');
 
-const Game1 = () => {
+const agricultural = () => {
   const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -28,6 +28,13 @@ const Game1 = () => {
   const [victorySound, setVictorySound] = useState();
   const [loseSound, setLoseSound] = useState();
 
+  const { unlockLevel } = useContext(LevelContext);
+  const levelId = 5; // Replace with the appropriate level ID for this game
+  const completeLevel = () => {
+    const nextLevel = levelId + 1;
+    unlockLevel(nextLevel);
+    navigation.navigate('home'); // Navigate back to home or any other screen
+  };
   useEffect(() => {
     const handleChange = ({ window }) => {
       setDimensions({ width: window.width, height: window.height });
@@ -140,7 +147,6 @@ const Game1 = () => {
       handleIncrement();
       stopTimer();
       setTimeout(() => {
-        //navigation.navigate('recycling');
         completeLevel();
       }, 4000);
     } else {
@@ -166,13 +172,7 @@ const Game1 = () => {
       timerRef.current.stopTimer();
     }
   };
-  const { unlockLevel } = useContext(LevelContext);
-  const levelId = 4; // Replace with the appropriate level ID for this game
-  const completeLevel = () => {
-    const nextLevel = levelId + 1;
-    unlockLevel(nextLevel);
-    navigation.navigate('home'); // Navigate back to home or any other screen
-  };
+
   return (
     <ImageBackground source={image} resizeMode="cover" style={[styles.container, { width: dimensions.width, height: dimensions.height+50 }]} blurRadius={5}>
       <View style={styles.timer}>
@@ -190,13 +190,13 @@ const Game1 = () => {
           {/* Face Side */}
           <View style={styles.imageContainer}>
             <View style={styles.backgroundImage}>
-              <Image source={require('../../assets/images/engineerShadow.png')} style={styles.silhouetteImage} />
+              <Image source={require('../../assets/images/agriculturalShadow.png')} style={styles.silhouetteImage} />
             </View>
           </View>
           {/* Back Side */}
           <View style={styles.imageContainer}>
             <View style={styles.backgroundImage}>
-              <Image source={require('../../assets/images/engineer.png')} style={styles.silhouetteImage} />
+              <Image source={require('../../assets/images/agricultural.png')} style={styles.silhouetteImage} />
             </View>
           </View>
         </FlipCard>
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     height: initialHeight*0.25,
   },
   silhouetteImage: {
-    width: initialWidth*0.29,
+    width: initialWidth*0.25,
     height: initialHeight*0.36,
   },
   hintTextContainer: {
@@ -401,4 +401,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Game1;
+export default agricultural;

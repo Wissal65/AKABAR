@@ -1,23 +1,52 @@
-// components/ModalComponent.js
-import React from 'react';
+// components/Assistant.js
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { closeModal } from '../store/reducer/ui/ModalSlice';
+import { closeAssistant } from '@/store/reducer/ui/AssistantSlice';
 import LottieView from 'lottie-react-native';
-import { useNavigation } from 'expo-router';
-const ModalComponent = () => {
+import { Audio } from 'expo-av';
+
+const Assistant = ({ onClose }) => {
   const dispatch = useDispatch();
-  const { isOpen, modalText, navigateTo } = useSelector((state) => state.modal);
- const navigate = useNavigation();
-  const handelNavigate=()=>{
-    navigate.navigate(navigateTo);
-  }
+  const { isOpen, modalText, audio } = useSelector((state) => state.assistant);
+
+  useEffect(() => {
+    let sound;
+    const playSound = async () => {
+      if (isOpen && audio) {
+        sound = new Audio.Sound();
+        try {
+          await sound.loadAsync(audio);
+          await sound.playAsync();
+        } catch (error) {
+          console.log('Failed to play the sound', error);
+        }
+      }
+    };
+
+    playSound();
+
+    // Cleanup function to release the sound object when the modal is closed
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [isOpen, audio]);
+
+  const handleClose = () => {
+    dispatch(closeAssistant());
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
     <Modal
       transparent
       visible={isOpen}
       animationType="slide"
-      onRequestClose={() => dispatch(closeModal())}
+      onRequestClose={handleClose}
     >
       <View style={styles.modalOverlay}>
         <LottieView 
@@ -28,7 +57,7 @@ const ModalComponent = () => {
         />
         <View style={styles.modalContainer}>
           <Text style={styles.modalText}>{modalText}</Text>
-          <TouchableOpacity style={styles.button} onPress={() => {dispatch(closeModal()); handelNavigate()}}>
+          <TouchableOpacity style={styles.button} onPress={handleClose}>
             <Text style={styles.buttonText}>حسنا</Text>
           </TouchableOpacity>
         </View>
@@ -52,15 +81,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatar: {
-    width: 300,
-    height: 500,
+    width: 200,
+    height: 550,
     marginBottom: '-30%',
   },
   modalText: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
-    fontFamily:"AlmaraiRegular"
+    fontFamily: "AlmaraiRegular",
+    lineHeight:30,
   },
   button: {
     backgroundColor: '#FFD700',
@@ -76,11 +106,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    textShadowColor: 'black', // Shadow color
-    textShadowOffset: { width: -1, height: 1 }, // Shadow offset
-    textShadowRadius: 1, // Shadow radius
-    fontFamily:"AlmaraiExtraBold"
+    textShadowColor: 'black',
+    textShadowOffset: { width: -1, height: 1 },
+    textShadowRadius: 1,
+    fontFamily: "AlmaraiExtraBold"
   },
 });
 
-export default ModalComponent;
+export default Assistant;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { View, Text, StyleSheet, Image, ImageBackground, TouchableOpacity, Dimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { DraxProvider, DraxView } from 'react-native-drax';
@@ -6,6 +6,11 @@ import Modal from 'react-native-modal';
 import { Audio } from 'expo-av';
 import { useNavigation } from 'expo-router';
 import Question from '../../components/Question';
+import { LevelContext } from '@/hooks/ContextLevel';
+import Timer from '@/components/Timer';
+import { openAssistan } from '@/store/reducer/ui/AssistantSlice';
+import { useDispatch } from 'react-redux';
+import Assistant from '@/components/Assistant';
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,9 +21,12 @@ const bins = [
 ];
 
 const initialItems = [
-  { id: 'item1', label: 'Newspaper', type: 'paper', image: require('../../assets/images/papers.png'), explanation: 'les journaux sont de type papier' },
-  { id: 'item2', label: 'Bottle', type: 'glass', image: require('../../assets/images/glass.png'), explanation: 'La bouteille est de type glass' },
-  { id: 'item3', label: 'Plastic Bag', type: 'plastic', image: require('../../assets/images/plastic.png'), explanation: 'Les sacs plastiques est de type plastique' },
+  { id: 'item1', label: 'Newspaper', type: 'paper', image: require('../../assets/images/paper2_trash.png'), explanation: 'les journaux sont de type papier' },
+  { id: 'item4', label: 'Newspaper', type: 'paper', image: require('../../assets/images/paper_trash.png'), explanation: 'les journaux sont de type papier' },
+  { id: 'item2', label: 'Bottle', type: 'glass', image: require('../../assets/images/lemonade_trash.png'), explanation: 'La bouteille est de type glass' },
+  { id: 'item3', label: 'Plastic Bag', type: 'plastic', image: require('../../assets/images/trash4.png'), explanation: 'Les sacs plastiques est de type plastique' },
+  { id: 'item5', label: 'Plastic Bag', type: 'plastic', image: require('../../assets/images/apple_trash.png'), explanation: 'Les sacs plastiques est de type plastique' },
+  { id: 'item6', label: 'Plastic Bag', type: 'plastic', image: require('../../assets/images/bottle_trash.png'), explanation: 'Les sacs plastiques est de type plastique' },
 ];
 
 export default function tri_game() {
@@ -31,9 +39,16 @@ export default function tri_game() {
   const [modalExplanation, setModalExplanation] = useState('');
   const [isCorrect, setIsCorrect] = useState(false);
   const [isEndModalVisible, setIsEndModalVisible] = useState(false);
-
+  const dispatch = useDispatch();
   const navigation = useNavigation();
 
+  const { unlockLevel } = useContext(LevelContext);
+  const levelId = 2; // Replace with the appropriate level ID for this game
+  const completeLevel = () => {
+    const nextLevel = levelId + 1;
+    unlockLevel(nextLevel);
+    navigation.navigate('recycling_intro'); // Navigate back to home or any other screen
+  };
   const playSound = async () => {
     const { sound } = await Audio.Sound.createAsync(
       require('../../assets/audio/throw_trash.wav')
@@ -82,11 +97,13 @@ export default function tri_game() {
   };
 
   const handleEndModalClose = () => {
+    stopTimer();
     setIsEndModalVisible(false);
     setItems(initialItems);
     setCurrentItem(initialItems[0]);
     setIsItemVisible(true);
     setScore(0);
+    completeLevel();
   };
 
   const resetItemPosition = () => {
@@ -99,22 +116,39 @@ export default function tri_game() {
   useEffect(() => {
     const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
     const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
-
     hideTabBar();
-
+    startTimer();
     return () => showTabBar();
   }, [navigation]);
+  const timerRef = useRef();
+
+
+  const startTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.startTimer();
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.stopTimer();
+    }
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <Assistant onClose={startTimer} />
       <ImageBackground
         source={require('../../assets/images/back_tri.jpg')}
         style={styles.background}
       >
+        <View style={styles.timer}>
+          <Text style={styles.score}>Score: {score}</Text>
+          <Timer ref={timerRef} duration={45} nextScreen={"recycling_intro"} />
+        </View>
         <DraxProvider>
           <View style={styles.container}>
             <Question />
-            <Text style={styles.score}>Score: {score}</Text>
             <View style={styles.initialPosition}>
               <View style={styles.circle} />
               {isItemVisible && currentItem && (
@@ -181,14 +215,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  timer: {
+    width: '100%',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    marginTop: '5%',
+    paddingRight: '4%',
+    alignItems:"center"
+  },
   score: {
     fontSize: width * 0.06,
     fontWeight: 'bold',
     color: 'white',
-    position: 'absolute',
-    top: '5%',
-    right: '70%',
-    zIndex: 1,
   },
   initialPosition: {
     position: 'absolute',

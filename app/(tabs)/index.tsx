@@ -1,23 +1,35 @@
 import {View,Text, Image, StyleSheet, Platform,TouchableOpacity,Button} from 'react-native';
-import { useEffect ,useRef,useState} from 'react';
+import { useContext, useEffect ,useRef,useState} from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { getScore} from '../../hooks/scoreManager'
-import { Link } from 'expo-router';
-import ModalComponent from '@/components/ModalComponent';
+import ModalComponent from '@/components/ModalAssistant';
 import { openModal } from '@/store/reducer/ui/ModalSlice';
-import { openAssisModal } from '@/store/reducer/ui/MdalAssistantSlice';
 import { useDispatch } from 'react-redux';
 import diamond from "@/assets/images/icons/diamond.png";
-import TrushCapacity from '@/components/trushCapacity';
-import Timer from '@/components/Timer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Assistant  from '@/components/Assistant';
+import { LevelContext } from '@/hooks/ContextLevel';
+import{ openAssistan } from '@/store/reducer/ui/AssistantSlice';
 SplashScreen.preventAutoHideAsync();
  const HomeScreen=()=> {
   const dispatch = useDispatch();
-
+  const { resetLevels } = useContext(LevelContext);
+  const resetFirstLaunch = async () => {
+    try {
+      await AsyncStorage.removeItem('hasLaunched');
+      console.log('First launch flag has been reset.');
+    } catch (error) {
+      console.error('Error resetting first launch flag:', error);
+    }
+  };
+  const handleReset = () => {
+    resetFirstLaunch();
+    resetLevels();
+  };
   const handleOpenModal = () => {
-    dispatch(openModal({ componentName: 'YourComponentName',modalText:"hello" }));
+    dispatch(openAssistan({ componentName: 'YourComponentName',modalText:"hello",audio:require('@/assets/audio/areYouRady.mp3')}));
   };
   const navigation = useNavigation();
 
@@ -35,30 +47,25 @@ SplashScreen.preventAutoHideAsync();
     loadScore();
   }, []);
       
-    const [progress, setProgress] = useState(0);
-    const segments = [
-      { color: '#F95050' }, { color: '#F95050' }, { color: '#F95050' },
-      { color: '#ECB575' }, { color: '#ECB575' }, { color: '#E4BA47' },
-      { color: '#E4BA47' }, { color: '#E4BA47' }, { color: '#63D447' },
-      { color: '#6DEF4C' }, { color: '#5CFF33' }
-    ];
-  
-    const handleIncrement = () => {
-      setProgress((prev) => (prev < segments.length ? prev + 1 : prev));
+    useEffect(()=>{
+      startTimer()
+    },[])
+    const timerRef = useRef();
+
+    const startTimer = () => {
+      if (timerRef.current) {
+        timerRef.current.startTimer();
+      }
     };
-  const timerRef = useRef();
-
-  const startTimer = () => {
-    if (timerRef.current) {
-      timerRef.current.startTimer();
-    }
-  };
-
-  const stopTimer = () => {
-    if (timerRef.current) {
-      timerRef.current.stopTimer();
-    }
-  };
+  
+    const stopTimer = () => {
+      if (timerRef.current) {
+        timerRef.current.stopTimer();
+      }
+    };
+    useEffect(()=>{
+      startTimer();
+    },[])
   return (
   
   <View style={styles.container}>
@@ -123,10 +130,8 @@ SplashScreen.preventAutoHideAsync();
         </View>
       </LinearGradient>
       </TouchableOpacity>
-      <Timer ref={timerRef} duration={5} nextScreen={'setting'}/>
-      <Button title="Start Timer" onPress={startTimer} />
-      <Button title="stop Timer" onPress={stopTimer} />
-      <Button title="Open Modal" onPress={handleOpenModal} />
+
+      <Button title="Open Modal" onPress={handleReset} />
       <ModalComponent />
     </View>
   );

@@ -28,10 +28,10 @@ const Intro = () => {
 
   // Function to handle stage changes
   const handleStageChange = (nextStage) => {
-    imageScale.value = withTiming(1.2, { duration: 20000 }); // Zoom in effect
+    imageScale.value = withTiming(1.2, { duration: 10000 }); // Zoom in effect
     setTimeout(() => {
       setCurrentStage(nextStage);
-    }, 500); // Change stage after 500ms
+    }, 1000); // Change stage after 500ms
   };
 
   async function playSound(uri) {
@@ -50,8 +50,8 @@ const Intro = () => {
   const handleOpenModal = () => {
     dispatch(
       openAssistan({
-        modalText: 'هل انت مستعد',
-        audio: require('@/assets/audio/collecte4.mp3'),
+        modalText: 'تهانينا على نجاحك في جمع جميع النفايات من أنحاء القرية، ولكن للأسف نواجه الآن مشكلة أخرى. لقد قمنا بجمع كل النفايات في سلة واحدة، مما أدى إلى إصابة عامل النظافة بسبب تنوع النفايات وتداخلها. كان هناك زجاج بين النفايات، مما شكل خطرًا حقيقيًا.',
+        audio: require('@/assets/audio/recycling.mp3'),
       })
     );
   };
@@ -71,22 +71,11 @@ const Intro = () => {
     let timer;
 
     if (currentStage === 0) {
-      playSound(require('@/assets/audio/farmerCollect.mp3'));
-      timer = setTimeout(() => {
-        handleStageChange(1);
-      }, 8000);
-    } else if (currentStage === 1) {
-      playSound(require('@/assets/audio/collecte2.mp3'));
-      timer = setTimeout(() => {
-        handleStageChange(2);
-      }, 24000);
-    } else if (currentStage === 2) {
-      playSound(require('@/assets/audio/collecte3.mp3'));
+      playSound(require('@/assets/audio/aicha.mp3'));
       timer = setTimeout(() => {
         handleOpenModal();
-      }, 29000);
-    }
-
+      }, 17000);
+    } 
     return () => {
       if (timer) {
         clearTimeout(timer);
@@ -98,7 +87,7 @@ const Intro = () => {
   }, [currentStage]);
 
   const navigateTo = () => {
-    navigation.navigate('game1_1');
+    navigation.navigate('recycling');
   };
 
   return (
@@ -106,23 +95,7 @@ const Intro = () => {
       {currentStage === 0 && (
         <Animated.View style={[styles.imageContainer, animatedImageStyle]}>
           <Image
-            source={require('@/assets/images/screens/farmerCollect.png')}
-            style={styles.image}
-          />
-        </Animated.View>
-      )}
-      {currentStage === 1 && (
-        <Animated.View style={[styles.imageContainer, animatedImageStyle]}>
-          <Image
-            source={require('@/assets/images/screens/collecte2.png')}
-            style={styles.image}
-          />
-        </Animated.View>
-      )}
-      {currentStage === 2 && (
-        <Animated.View style={[styles.imageContainer, animatedImageStyle]}>
-          <Image
-            source={require('@/assets/images/screens/collecte3.png')}
+            source={require('@/assets/images/screens/aicha.jpg')}
             style={styles.image}
           />
         </Animated.View>

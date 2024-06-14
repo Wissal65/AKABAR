@@ -1,13 +1,13 @@
 // MainCalculationScreen.js
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { View, Image, TouchableWithoutFeedback, StyleSheet, Animated, Text, TextInput, ImageBackground, TouchableOpacity, Dimensions } from 'react-native';
 import backgrond from '@/assets/images/screens/caclcule.jpg';
 import { useDispatch } from 'react-redux';
 import { openModal } from '../../store/reducer/ui/ModalSlice';
-import CountdownTimer from '@/components/CountdownTimer';
 import { useNavigation } from 'expo-router';
-import { openAssisModal } from '@/store/reducer/ui/MdalAssistantSlice';
 import { Audio } from 'expo-av';
+import CountdownTimer from '@/components/CountdownTimer';
+import { LevelContext } from '@/hooks/ContextLevel';
 
 const calculeFacture = () => {
   const [isZoomed, setIsZoomed] = useState(false);
@@ -17,11 +17,17 @@ const calculeFacture = () => {
   const [result, setResult] = useState('');
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const stopTimerRef = useRef(null);
   const window = Dimensions.get('window');
   const { width, height } = window;
   const [victorySound, setVictorySound] = useState();
   const [loseSound, setLoseSound] = useState();
+  const { unlockLevel } = useContext(LevelContext);
+  const levelId = 3; // Replace with the appropriate level ID for this game
+  const completeLevel = () => {
+    const nextLevel = levelId + 1;
+    unlockLevel(nextLevel);
+    navigation.navigate('home'); // Navigate back to home or any other screen
+  };
   useEffect(() => {
     const loadSounds = async () => {
       const victory = await Audio.Sound.createAsync(
@@ -88,8 +94,8 @@ const calculeFacture = () => {
         console.log(calculation); // Log the immediate 
         if(calculation.toFixed(2) == 1.59){
           playVictorySound();
-          handleOpenModal('نتوصل الى ان عائله سلوى عائله مقتصده للكهرباء لان استهلاك الفرد فيها يقل عن المعدل الوطني لاستهلاك الكهرباء لان 1.59 اصغر من 2.81 ');
-
+          //handleOpenModal('نتوصل الى ان عائله سلوى عائله مقتصده للكهرباء لان استهلاك الفرد فيها يقل عن المعدل الوطني لاستهلاك الكهرباء لان 1.59 اصغر من 2.81 ');
+          completeLevel();
         }else{
           playLoseSound();
           handleOpenModal('لقد ارتكبت خطأ، يرجى المحاولة مرة أخرى');
@@ -110,22 +116,33 @@ const calculeFacture = () => {
   useEffect(() => {
     const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
     const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
-
+    startTimer();
     hideTabBar();
 
     return () => showTabBar();
   }, [navigation]);
+  const timerRef = useRef();
 
+  const startTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.startTimer();
+    }
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      timerRef.current.stopTimer();
+    }
+  };
   return (
     <ImageBackground 
       source={backgrond} 
       style={[styles.background, { width, height }]}
       blurRadius={7}
     >
-      <CountdownTimer
-        totalDuration={30}
-        navigateTo={navigateToNextScreen}
-      />
+      <View style={styles.timer}>
+      <CountdownTimer ref={timerRef} duration={30} nextScreen={"recycling"}  />
+      </View>
       <View style={styles.descriptionContainer}>
         <Text style={{fontFamily:"AlmaraiLight"}}>انقر على الصورة للتكبير</Text>
         <View style={styles.imageContainer}>
@@ -191,6 +208,12 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     alignItems: 'center',
     paddingTop: '5%',
+  },
+  timer:{
+    width:"100%",
+    alignItems:"flex-end",
+    marginTop:"4%",
+    paddingRight:"4%",
   },
   imageContainer: {
     zIndex: 2,

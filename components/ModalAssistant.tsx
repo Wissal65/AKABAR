@@ -2,30 +2,33 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { closeAssisModal } from '@/store/reducer/ui/MdalAssistantSlice';
+import { closeModal } from '../store/reducer/ui/ModalSlice';
 import LottieView from 'lottie-react-native';
-
-const ModalAssistant = () => {
+import { useNavigation } from 'expo-router';
+const ModalComponent = () => {
   const dispatch = useDispatch();
-  const { isOpen, modalText } = useSelector((state) => state.modal);
-
+  const { isOpen, modalText, navigateTo } = useSelector((state) => state.modal);
+ const navigate = useNavigation();
+  const handelNavigate=()=>{
+    navigate.navigate(navigateTo);
+  }
   return (
     <Modal
       transparent
       visible={isOpen}
       animationType="slide"
-      onRequestClose={() => dispatch(closeAssisModal())}
+      onRequestClose={() => dispatch(closeModal())}
     >
       <View style={styles.modalOverlay}>
         <LottieView 
-          source={require('../assets/images/doctor.png')} 
+          source={require('../assets/animation/avatar.json')} 
           autoPlay 
           loop 
           style={styles.avatar} 
         />
         <View style={styles.modalContainer}>
           <Text style={styles.modalText}>{modalText}</Text>
-          <TouchableOpacity style={styles.button} onPress={() => dispatch(closeAssisModal())}>
+          <TouchableOpacity style={styles.button} onPress={() => {dispatch(closeModal()); handelNavigate()}}>
             <Text style={styles.buttonText}>حسنا</Text>
           </TouchableOpacity>
         </View>
@@ -49,25 +52,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatar: {
-    width: 300,
-    height: 500,
+    width: 200,
+    height: 550,
     marginBottom: '-30%',
   },
   modalText: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 20,
+    fontFamily:"AlmaraiRegular"
   },
   button: {
     backgroundColor: '#FFD700',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
+    textShadowColor: 'black', // Shadow color
+    textShadowOffset: { width: -1, height: 1 }, // Shadow offset
+    textShadowRadius: 1, // Shadow radius
+    fontFamily:"AlmaraiExtraBold"
   },
 });
 
-export default ModalAssistant;
+export default ModalComponent;
