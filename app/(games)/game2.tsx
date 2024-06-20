@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ImageBackground, TouchableWithoutFeedback, Text, Alert, Dimensions, useWindowDimensions, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, ImageBackground, Image, TouchableWithoutFeedback, Text, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Animatable from 'react-native-animatable'; // Import Animatable library
 import { Audio } from 'expo-av';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { useNavigation } from 'expo-router';
-
 type CircleZone = {
   cx: number;
   cy: number;
@@ -13,91 +11,70 @@ type CircleZone = {
 };
 
 type ImageWithZones = {
-  image: any;
+  image: any; // Image source
   zones: CircleZone[];
 };
 
-
 const imagesWithZones: ImageWithZones[] = [
   {
-    image: require('@/assets/images/back_prob.png'),
+    image: require('@/assets/images/prob1_.png'),
     zones: [
-      { cx: 0.79, cy: 0.32, radius: 0.14, color: 'rgba(0, 255, 0, 0)' },
-      { cx: 0.8, cy: 0.49, radius: 0.13, color: 'rgba(255, 255, 0, 0)' },
-    ],
-  },
-  
-  {
-    image: require('@/assets/images/back_prob2.png'),
-    zones: [
-        { cx: 0.2, cy: 0.56, radius: 0.12, color: 'rgba(0, 255, 0, 0)' },
-        { cx: 0.12, cy: 0.46, radius: 0.06, color: 'rgba(255, 255, 0, 0)' },
-        { cx: 0.85, cy: 0.415, radius: 0.06, color: 'rgba(255, 255, 0, 0)' },
-    ],
-  },
-  
-  {
-    image: require('@/assets/images/back_prob3.png'),
-    zones: [
-        { cx: 0.32, cy: 0.64, radius: 0.14, color: 'rgba(0, 255, 0, 0)' },
-        { cx: 0.48, cy: 0.32, radius: 0.14, color: 'rgba(255, 255, 0, 0)' },
-
+      { cx: 290, cy: 169, radius: 75, color: 'rgba(0, 255, 0, 0.2)' },
+      { cx: 290, cy: 320, radius: 58, color: 'rgba(255, 255, 0, 0.3)' },
     ],
   },
   {
-    image: require('@/assets/images/back_prob4.png'),
+    image: require('@/assets/images/prob4.png'),
     zones: [
-        { cx: 0.32, cy: 0.54, radius: 0.148, color: 'rgba(0, 255, 0, 0)' },
-
+        { cx: 36, cy: 300, radius: 27, color: 'rgba(0, 255, 0, 0.2)' },
+        { cx: 330, cy: 270, radius: 26, color: 'rgba(0, 255, 0, 0.2)' },
+        { cx: 74, cy: 400, radius: 65, color: 'rgba(255, 255, 0, 0.3)' },
     ],
   },
   {
-    image: require('@/assets/images/back_prob5.png'),
+    image: require('@/assets/images/prob2_.png'),
     zones: [
-        { cx: 0.32, cy: 0.54, radius: 0.148, color: 'rgba(0, 255, 0, 0)' },
-
+      { cx: 170, cy: 171, radius: 57, color: 'rgba(0, 255, 0, 0.2)' },
+      { cx: 105, cy: 450, radius: 66, color: 'rgba(255, 255, 0, 0.3)' },
     ],
   },
-  // Add other images with zones here...
+  {
+    image: require('@/assets/images/prob5_.png'),
+    zones: [
+        { cx: 86, cy: 360, radius: 62, color: 'rgba(255, 255, 0, 0.3)' },
+    ],
+  },  {
+    image: require('@/assets/images/prob6_.png'),
+    zones: [
+        { cx: 120, cy: 320, radius: 57, color: 'rgba(255, 255, 0, 0.3)' },
+    ],
+  },
 ];
 
-
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 const App = () => {
-  const navigation = useNavigation();
-  const [selectedZones, setSelectedZones] = useState<number[]>([]);
+  const [selectedZones, setSelectedZones] = useState<CircleZone[]>([]);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(50);
-  const [gameOver, setGameOver] = useState(false);
-  const [disableClick, setDisableClick] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [clickSound, setClickSound] = useState<Audio.Sound | null>(null);
-  const [correctSound, setCorrectSound] = useState<Audio.Sound | null>(null);
-  const [detectedZones, setDetectedZones] = useState<boolean[]>(new Array(imagesWithZones[0].zones.length).fill(false));
-
-
-
+  const [timeLeft, setTimeLeft] = useState(50); // Initial time left
+  const [gameOver, setGameOver] = useState(false); // State to track game over
+  const [disableClick, setDisableClick] = useState(false); // State to disable click after game over
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State to track current image
+  
+  const [clickSound, setClickSound] = useState<Audio.Sound | null>(null); // State for click sound
+  const [correctSound, setCorrectSound] = useState<Audio.Sound | null>(null); // State for correct sound
+  
   useEffect(() => {
+    // Load sounds
     const loadSounds = async () => {
-      const { sound: click } = await Audio.Sound.createAsync(require('@/assets/audio/tap.mp3'));
-      const { sound: correct } = await Audio.Sound.createAsync(require('@/assets/audio/right.mp3'));
+        const { sound: click } = await Audio.Sound.createAsync(require('@/assets/tap.mp3'));
+      const { sound: correct } = await Audio.Sound.createAsync(require('@/assets/right.mp3'));
       setClickSound(click);
       setCorrectSound(correct);
     };
-    useEffect(() => { 
-      const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
-      const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
-  
-      // Hide tab bar when entering the screen
-      hideTabBar();
-  
-      // Show tab bar when leaving the screen
-      return () => showTabBar();
-    }, [navigation]);
+
     loadSounds();
 
     return () => {
+      // Unload sounds
       if (clickSound) {
         clickSound.unloadAsync();
       }
@@ -106,6 +83,21 @@ const App = () => {
       }
     };
   }, []);
+
+//   useEffect(() => {
+//     const loadScore = async () => {
+//       try {
+//         const savedScore = await AsyncStorage.getItem('score');
+//         if (savedScore !== null) {
+//           setScore(parseInt(savedScore, 10));
+//         }
+//       } catch (error) {
+//         console.error('Failed to load score from AsyncStorage', error);
+//       }
+//     };
+
+//     loadScore();
+//   }, []);
 
   useEffect(() => {
     const saveScore = async () => {
@@ -125,49 +117,50 @@ const App = () => {
     }
   };
 
-  const handleZonePress = (zoneIndex: number) => {
-    if (gameOver || disableClick || selectedZones.includes(zoneIndex)) return;
-
+  const handleZonePress = (zone: CircleZone) => {
+    if (gameOver || disableClick) return; // Do nothing if game is over or click is disabled
+    // Play click sound
     if (clickSound) {
-      clickSound.replayAsync();
-    }
-
-    setSelectedZones((prevSelectedZones) => [...prevSelectedZones, zoneIndex]);
-    setScore((prevScore) => prevScore + 1);
+        clickSound.replayAsync();
+      }
+    setSelectedZones(prevSelectedZones => [...prevSelectedZones, zone]);
+    setScore(prevScore => prevScore + 1); // Increment score
 
     const currentZones = imagesWithZones[currentImageIndex].zones;
-
-    setDetectedZones((prevDetectedZones) => {
-      const updatedDetectedZones = [...prevDetectedZones];
-      updatedDetectedZones[zoneIndex] = true;
-      return updatedDetectedZones;
-    });
-
-    if (selectedZones.length + 1 === currentZones.length) {
+    if (selectedZones.length === currentZones.length - 1 && currentZones.includes(zone)) {
+      // Play correct sound
       if (correctSound) {
         correctSound.replayAsync();
       }
 
+      // If the last zone is clicked correctly, move to the next image
       if (currentImageIndex < imagesWithZones.length - 1) {
-        setDisableClick(true);
+        setDisableClick(true); // Disable click while transitioning to next image
         setTimeout(() => {
-          setCurrentImageIndex((prevIndex) => prevIndex + 1);
-          setSelectedZones([]);
-          setDisableClick(false);
-          setDetectedZones(new Array(imagesWithZones[currentImageIndex + 1].zones.length).fill(false));
-        }, 150);
+          setCurrentImageIndex(prevIndex => prevIndex + 1);
+          setSelectedZones([]); // Reset selected zones for the next image
+        //   imageViewRef.current?.fadeIn(200);
+          setDisableClick(false); // Re-enable click after image transition
+        }, 150); // Adjust delay as needed
       } else {
+        // If all images are completed, game over
         setGameOver(true);
         setDisableClick(true);
         Alert.alert('Game Over', 'Congratulations! You completed all the images.');
       }
+    } else if (selectedZones.length === currentZones.length - 1 && !currentZones.includes(zone)) {
+      // If the last zone clicked is incorrect, game over
+      setGameOver(true);
+      setDisableClick(true);
+      Alert.alert('Game Over', 'You clicked the wrong zone.');
     }
   };
 
   useEffect(() => {
+    // Update time every second
     const interval = setInterval(() => {
       if (!gameOver && timeLeft > 0) {
-        setTimeLeft((prevTime) => prevTime - 1);
+        setTimeLeft(prevTime => prevTime - 1);
       }
       if (timeLeft === 0 && !gameOver) {
         setGameOver(true);
@@ -175,112 +168,127 @@ const App = () => {
         Alert.alert('Game Over', 'Time is up.');
       }
     }, 1000);
+    // Clear interval on unmount to prevent memory leaks
     return () => clearInterval(interval);
-  }, [timeLeft, gameOver]);
+  }, [timeLeft, gameOver]); // Rerun effect when timeLeft or gameOver state changes
+
+  const imageViewRef = useRef<Animatable.View>(null); // Define a ref for Animatable.View
 
   const currentImageWithZones = imagesWithZones[currentImageIndex];
 
   return (
     <TouchableWithoutFeedback onPress={handleGeneralClick}>
-      <View style={styles.container}>
-        <ImageBackground
-          source={currentImageWithZones.image}
-          style={[styles.backgroundImage, { width: windowWidth, height: windowHeight, aspectRatio: window.devicePixelRatio}]}
-          resizeMode="cover"// Change to "contain" to maintain aspect ratio
-        >
+    <View style={styles.container}>
+      <ImageBackground
+        blurRadius={8}
+        source={require('@/assets/images/back8.png')}
+        style={styles.backgroundImage}
+      >
+        <View style={styles.overlay} />
+        <View style={styles.imageContainer}>
+          <Animatable.View // Use Animatable.View for animation
+             key={currentImageIndex} // Assign ref to Animatable.View
+            animation="fadeIn" // Fade-in animation
+            duration={500} // Duration of animation
+            style={styles.imageWrapper}
+          >
+            <Image
+              source={currentImageWithZones.image}
+              style={styles.image}
+            />
+          </Animatable.View>
           {currentImageWithZones.zones.map((zone, index) => (
-            <TouchableWithoutFeedback key={index} onPress={() => handleZonePress(index)}>
+            <TouchableWithoutFeedback key={index} onPress={() => handleZonePress(zone)}>
               <View
                 style={[
-                  styles.zone,
+                  styles.zone_,
                   {
-                    position: 'absolute',
-                    top: zone.cy * windowHeight - zone.radius * windowWidth,
-                    left: zone.cx * windowWidth - zone.radius * windowWidth,
-                    width: zone.radius * 2 * windowWidth,
-                    height: zone.radius * 2 * windowWidth,
-                    borderRadius: zone.radius * windowWidth,
-                    borderWidth: selectedZones.includes(index) ? 2 : 0,
-                    borderColor: selectedZones.includes(index) ? 'red' : 'transparent',
-                    backgroundColor: selectedZones.includes(index) ? zone.color : 'transparent',
+                    top: zone.cy - zone.radius,
+                    left: zone.cx - zone.radius,
+                    width: zone.radius * 2,
+                    height: zone.radius * 2,
+                    borderRadius: zone.radius,
                   },
                 ]}
               />
             </TouchableWithoutFeedback>
           ))}
-          
-          <View style={styles.detectedZonesContainer}>
-            {currentImageWithZones.zones.map((zone, index) => (
-              // <Icon
-              //   key={index}
-              //   name="search"
-              //   size={windowWidth*0.05}
-              //   color="green"
-              //   style={{ opacity: selectedZones.includes(index) ? 1 : 0.7, marginHorizontal: 5 }}
-              // />
-
-        <Image
-         key={index}
-         source={require('@/assets/images/icon_loop.png')} // Replace 'your-image-path' with the path to your image
-         style={[
-        {
-          width: windowWidth * 0.05,
-          height: windowWidth * 0.05,
-          opacity: selectedZones.includes(index) ? 1 : 0.7,
-          marginHorizontal: 5,
-        },
-      ]}
-    />
-            ))}
-          </View>
-          {/* <Text style={styles.scoreText}>Score: {score}</Text> */}
-          <Text style={styles.timeText}>Time Left: {timeLeft}</Text>
-        </ImageBackground>
-      </View>
-    </TouchableWithoutFeedback>
+          {selectedZones.map((zone, index) => (
+            <View
+              key={index}
+              style={[
+                styles.zone,
+                {
+                  top: zone.cy - zone.radius,
+                  left: zone.cx - zone.radius,
+                  width: zone.radius * 2,
+                  height: zone.radius * 2,
+                  borderRadius: zone.radius,
+                  borderColor: 'red', // Yellow border
+                  backgroundColor: 'transparent', // No background color
+                },
+              ]}
+            />
+          ))}
+        </View>
+        {/* <Text style={styles.scoreText}>Score: {score}</Text> */}
+        <Text style={styles.timeText}>Time Left: {timeLeft}</Text>
+      </ImageBackground>
+    </View>
+     </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  backgroundImage: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  zone: {
-    // position: 'absolute',
-    // borderWidth: 2,
-    // borderColor: 'red',
-    // backgroundColor: 'transparent',
-  },
-  detectedZonesContainer: {
-    position: 'absolute',
-    top: windowHeight * 0.03,
-    left: windowWidth * 0.04,
-    flexDirection: 'row',
-    backgroundColor: 'black',
-    opacity: 0.75,
-    padding: 6,
-    borderRadius: 31,
-    gap: 3,
-  },
-  detectedZone: {
-    backgroundColor: 'green',
-    marginHorizontal: 5,
-
-  },
-  scoreText: {
-  },
-  timeText: {
-    position: 'absolute',
-    top: windowHeight * 0.03,
-    right: windowWidth * 0.04,
-    color: 'white',
-    fontSize: 22,
-  },
+    flex: 1
+},
+backgroundImage: {
+  flex: 1,
+  resizeMode: 'cover',
+},
+overlay: {
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: 'rgba(255, 190, 11, 0.16)', // #FFBE0B with 31% opacity
+},
+imageContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+imageWrapper: {
+  width: '91%', // Adjust size as needed
+  height: '65%', // Adjust size as needed
+},
+image: {
+  flex: 1,
+  width: '100%', // Adjust size as needed
+  height: '100%', // Adjust size as needed
+},
+zone: {
+  position: 'absolute',
+  borderWidth: 2,
+  borderColor: 'red', // Red border color
+  backgroundColor: 'transparent', // No background color
+},
+zone_: {
+  position: 'absolute',
+  borderWidth: 0,
+},
+scoreText: {
+  position: 'absolute',
+  top: 30,
+  left: 10,
+  color: 'white',
+  fontSize: 20,
+},
+timeText: {
+  position: 'absolute',
+  top: 30,
+  right: 10,
+  color: 'white',
+  fontSize: 20,
+},
 });
 
 export default App;
